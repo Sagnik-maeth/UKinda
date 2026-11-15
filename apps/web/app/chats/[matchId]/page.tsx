@@ -26,6 +26,7 @@ export default function ChatPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmBlock, setConfirmBlock] = useState(false);
   const [blocking, setBlocking] = useState(false);
+  const [blockError, setBlockError] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -51,13 +52,20 @@ export default function ChatPage() {
   async function block() {
     if (!other) return;
     setBlocking(true);
-    const response = await fetch("/api/block", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ targetId: other.id }),
-    });
-    setBlocking(false);
-    if (response.ok) router.replace("/chats");
+    setBlockError("");
+    try {
+      const response = await fetch("/api/block", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ targetId: other.id }),
+      });
+      if (!response.ok) throw new Error();
+      router.replace("/chats");
+    } catch {
+      setBlockError("Couldn't block right now, try again.");
+    } finally {
+      setBlocking(false);
+    }
   }
 
   if (status === "not-found") {
@@ -114,6 +122,7 @@ export default function ChatPage() {
                           {blocking ? "Blocking…" : "Block"}
                         </button>
                       </div>
+                      {blockError && <p role="alert" className="mt-2 text-sm text-red-700">{blockError}</p>}
                     </div>
                   )}
                 </div>

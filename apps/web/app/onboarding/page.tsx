@@ -169,6 +169,9 @@ export default function OnboardingPage() {
                   <label className="block text-sm font-semibold">Current favourites <span className="font-normal text-slate-400">(optional)</span>
                     <input className="field mt-2" maxLength={200} value={profile.favorites ?? ""} onChange={(event) => update("favorites", event.target.value)} placeholder="Interstellar, Arijit Singh, Valorant" />
                   </label>
+                  <p className="muted rounded-xl bg-slate-50 p-3 text-xs">
+                    🔒 These answers (never your email, name or chats) are processed by Google Gemini to find your matches. Skip anything you&apos;d rather keep to yourself.
+                  </p>
                 </div>
               )}
 

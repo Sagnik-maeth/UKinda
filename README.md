@@ -59,3 +59,11 @@ The Compose database listens on host port `5432` by default. If another local Po
 ## Privacy
 
 Use synthetic profiles for demos. Emails and real names are never included in public profile, recommendation, or chat responses. The demo OTP is not suitable for production; configure real email verification, rate limiting, and moderation before deploying.
+
+**What is sent to Google Gemini:** only profile text (interests, the "tell us more" answers, what someone is looking for, and slider descriptions) for embeddings, the vibe line and icebreakers. Emails, real names, aliases and chat messages are never sent. On the free tier, Google may use prompts to improve its products and human reviewers may read them; for production, use a paid Gemini tier (or a self-hosted embedding model) where prompts are not used for training.
+
+**Other safeguards:**
+- Chat history and socket rooms require match membership, and a block in either direction hides the chat and stops new messages.
+- Messages are trimmed, capped at 1000 characters, and empty messages are dropped.
+- `GEMINI_API_KEY` is only read on the server; it is never exposed through a `NEXT_PUBLIC_*` variable or imported by client components.
+- `.env` is git-ignored; only `.env.example` is committed.
