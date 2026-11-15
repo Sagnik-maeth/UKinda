@@ -3,6 +3,7 @@ node_modules/
 dist/
 coverage/
 .turbo/
+*.tsbuildinfo
 .env
 .env.*
 !.env.example
@@ -10,3 +11,5 @@ coverage/
 packages/db/prisma/*.db
 packages/db/prisma/*.db-journal
 packages/core/.cache/
+
+/generated/prisma

@@ -8,6 +8,7 @@
   "scripts": {
     "db:generate": "prisma generate",
     "migrate": "dotenv -e ../../.env -- prisma migrate deploy",
+    "reset": "dotenv -e ../../.env -- prisma migrate reset --force",
     "studio": "dotenv -e ../../.env -- prisma studio"
   },
   "dependencies": {

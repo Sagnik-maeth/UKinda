@@ -3,15 +3,19 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./constants": "./src/constants.ts",
+    "./schemas": "./src/schemas.ts"
   },
   "scripts": {
+    "check-gemini": "dotenv -e ../../.env -- tsx scripts/check-gemini.ts",
     "warmup": "dotenv -e ../../.env -- tsx scripts/warmup.ts",
-    "seed": "dotenv -e ../../.env -- tsx scripts/seed.ts"
+    "seed": "dotenv -e ../../.env -- tsx scripts/seed.ts",
+    "generate-seed": "dotenv -e ../../.env -- tsx scripts/generate-seed.ts"
   },
   "dependencies": {
     "@campus/db": "*",
-    "@huggingface/transformers": "^3.7.2",
+    "@google/genai": "^1.52.0",
     "jose": "^5.9.6",
     "zod": "^3.24.2"
   }
