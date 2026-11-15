@@ -1,0 +1,18 @@
+{
+  "name": "@campus/core",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "warmup": "dotenv -e ../../.env -- tsx scripts/warmup.ts",
+    "seed": "dotenv -e ../../.env -- tsx scripts/seed.ts"
+  },
+  "dependencies": {
+    "@campus/db": "*",
+    "@huggingface/transformers": "^3.7.2",
+    "jose": "^5.9.6",
+    "zod": "^3.24.2"
+  }
+}

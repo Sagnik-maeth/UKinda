@@ -1,0 +1,13 @@
+{
+  "name": "@campus/realtime",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "dotenv -e ../../.env -- tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@campus/core": "*",
+    "@campus/db": "*",
+    "socket.io": "^4.8.1"
+  }
+}

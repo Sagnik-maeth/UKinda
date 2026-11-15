@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --ink: #1c2834;
+  --muted: #64748b;
+  --paper: #f7f8f6;
+  --green: #2b765c;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+
+.page-shell { min-height: 100vh; padding: 32px 20px 96px; }
+.content-width { width: min(100%, 980px); margin-inline: auto; }
+.card { border: 1px solid #e4e9e5; border-radius: 22px; background: white; box-shadow: 0 10px 32px #244b3510; }
+.muted { color: var(--muted); }
+.field { width: 100%; border: 1px solid #d5ded8; border-radius: 12px; padding: 12px 14px; background: white; }
+.field:focus { outline: 2px solid #9ed1b9; border-color: #5a9c7d; }
+.primary-button { border: 0; border-radius: 12px; background: var(--green); color: white; padding: 12px 18px; font-weight: 700; }
+.primary-button:disabled { opacity: .5; cursor: not-allowed; }
+.secondary-button { border: 1px solid #cbd5ce; border-radius: 12px; background: white; padding: 11px 16px; font-weight: 650; }
+.chip { border: 1px solid #d9e2dc; border-radius: 999px; background: white; padding: 8px 13px; }
+.chip[aria-pressed="true"] { border-color: #2b765c; background: #e8f4ed; color: #205942; }
+
+@media (max-width: 640px) {
+  .page-shell { padding: 20px 14px 90px; }
+}
