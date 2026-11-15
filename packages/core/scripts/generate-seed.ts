@@ -1,7 +1,7 @@
 // Run ONCE before the hackathon: `npm run generate-seed -w @campus/core`.
 // Makes 6 requests to the "smart" Gemini model and writes seed-profiles.json (commit it).
-import { writeFileSync } from "node:fs";
-import { Type } from "@google/genai";
+import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { ThinkingLevel, Type } from "@google/genai";
 import { ai, MODELS, withRetry } from "../src/gemini";
 import { ALL_TAGS, AVAILABILITY, LOOKING_FOR } from "../src/constants";
 import { ProfileInput } from "../src/schemas";
@@ -35,8 +35,19 @@ const profileSchema = {
   required: ["year", "sliders", "tags", "lookingFor", "availability", "weekend", "talkAbout", "lookingForText"],
 };
 
-const out: Array<{ email: string } & ProfileInput> = [];
+type SeedProfile = { email: string } & ProfileInput;
+
+// Progress is saved after each archetype, so a crash or quota hit resumes instead of starting over.
+const PROGRESS = new URL("./.generate-seed-progress.json", import.meta.url);
+const progress: Record<string, SeedProfile[]> = existsSync(PROGRESS) ? JSON.parse(readFileSync(PROGRESS, "utf8")) : {};
+
 for (const [i, archetype] of ARCHETYPES.entries()) {
+  if (progress[archetype]?.length) {
+    console.log(`↺ ${archetype} (${progress[archetype].length} saved)`);
+    continue;
+  }
+  const started = Date.now();
+  const batch: SeedProfile[] = [];
   const res = await withRetry(() => ai().models.generateContent({
     model: MODELS.smart,
     contents:
@@ -47,6 +58,7 @@ for (const [i, archetype] of ARCHETYPES.entries()) {
     config: {
       responseMimeType: "application/json",
       responseSchema: { type: Type.ARRAY, items: profileSchema },
+      thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }, // structured output doesn't need deep reasoning
     },
   }));
 
@@ -54,17 +66,23 @@ for (const [i, archetype] of ARCHETYPES.entries()) {
   for (const [j, p] of (Array.isArray(profiles) ? profiles : []).entries()) {
     const parsed = ProfileInput.safeParse({
       ...p,
+      branch: typeof p?.branch === "string" ? p.branch.trim().slice(0, 40) || undefined : undefined,
       sliders: p?.sliders?.slice(0, 6),
       tags: p?.tags ? [...new Set<string>(p.tags)].slice(0, 10) : undefined,
     });
     if (parsed.success) {
-      out.push({ email: `seed${String(i * 10 + j).padStart(2, "0")}@${DOMAIN}`, ...parsed.data });
+      batch.push({ email: `seed${String(i * 10 + j).padStart(2, "0")}@${DOMAIN}`, ...parsed.data });
     } else {
-      console.warn("skipped invalid profile", parsed.error.issues[0]);
+      const issue = parsed.error.issues[0];
+      console.warn(`  skipped invalid profile: ${issue.path.join(".")}: ${issue.message}`);
     }
   }
-  console.log(`✓ ${archetype}`);
+  progress[archetype] = batch;
+  writeFileSync(PROGRESS, JSON.stringify(progress, null, 2));
+  console.log(`✓ ${archetype}: ${batch.length} profiles in ${((Date.now() - started) / 1000).toFixed(0)}s`);
 }
+
+const out: SeedProfile[] = ARCHETYPES.flatMap((archetype) => progress[archetype] ?? []);
 
 // Two hand-written demo accounts that should match each other at the top.
 const demo = ProfileInput.parse({
@@ -86,4 +104,5 @@ out.push({
 });
 
 writeFileSync(new URL("./seed-profiles.json", import.meta.url), JSON.stringify(out, null, 2) + "\n");
+rmSync(PROGRESS, { force: true });
 console.log(`wrote ${out.length} profiles`);
