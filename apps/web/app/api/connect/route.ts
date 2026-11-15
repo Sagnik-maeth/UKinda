@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@campus/db";
+import { generateIcebreakers } from "@campus/core";
 import { requireUserId } from "@/lib/session";
 import { z } from "zod";
 
@@ -48,12 +49,22 @@ export async function POST(request: Request) {
     if (reverse?.action !== "CONNECT") return NextResponse.json({ matched: false });
 
     const [userAId, userBId] = [userId, targetId].sort();
-    const match = await prisma.match.upsert({
-      where: { userAId_userBId: { userAId, userBId } },
-      create: { userAId, userBId },
-      update: {},
-      select: { id: true },
-    });
+    const where = { userAId_userBId: { userAId, userBId } };
+    let match = await prisma.match.findUnique({ where, select: { id: true } });
+    if (!match) {
+      // One Gemini call per NEW match (never per page view); falls back to templates on failure.
+      const [first, second] = await Promise.all([
+        prisma.profile.findUnique({ where: { userId: userAId } }),
+        prisma.profile.findUnique({ where: { userId: userBId } }),
+      ]);
+      const icebreakers = first && second ? await generateIcebreakers(first, second) : [];
+      try {
+        match = await prisma.match.create({ data: { userAId, userBId, icebreakers }, select: { id: true } });
+      } catch {
+        // Both users pressed Connect at the same moment: the other request created it.
+        match = await prisma.match.findUniqueOrThrow({ where, select: { id: true } });
+      }
+    }
     return NextResponse.json({ matched: true, matchId: match.id });
   } catch (error) {
     if (error instanceof Response) return error;
