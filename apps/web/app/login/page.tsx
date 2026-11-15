@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { Button } from "@/components/Button";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,7 +21,7 @@ export default function LoginPage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email, otp }),
       });
-      const result = await response.json();
+      const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error ?? "Could not sign in");
       router.replace(result.onboarded ? "/matches" : "/onboarding");
       router.refresh();
@@ -48,7 +49,7 @@ export default function LoginPage() {
           </label>
           <p className="muted text-xs">Demo code: 123456</p>
           {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
-          <button className="primary-button w-full" disabled={busy}>{busy ? "Signing you in…" : "Continue"}</button>
+          <Button className="w-full" disabled={busy}>{busy ? "Signing you in…" : "Continue"}</Button>
         </form>
         <p className="muted mt-6 text-xs">Your email stays private. Your profile starts anonymous.</p>
       </section>
