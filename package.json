@@ -14,9 +14,11 @@
     "db:migrate": "npm run migrate -w @campus/db",
     "db:generate": "npm run db:generate -w @campus/db",
     "db:studio": "npm run studio -w @campus/db",
-    "db:reset": "npm exec -w @campus/db -- prisma migrate reset --force",
+    "db:reset": "npm run reset -w @campus/db",
     "seed": "npm run seed -w @campus/core",
-    "warmup": "npm run warmup -w @campus/core"
+    "generate-seed": "npm run generate-seed -w @campus/core",
+    "warmup": "npm run warmup -w @campus/core",
+    "check-gemini": "npm run check-gemini -w @campus/core"
   },
   "devDependencies": {
     "dotenv-cli": "^8.0.0",

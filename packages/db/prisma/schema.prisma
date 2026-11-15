@@ -55,6 +55,7 @@ model Profile {
   lookingForText   String
   unpopularOpinion String?
   favorites        String?
+  vibe             String?
   updatedAt        DateTime @updatedAt
 }
 
@@ -64,7 +65,7 @@ model ProfileChunk {
   user      User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   facet     Facet
   content   String
-  embedding Unsupported("vector(384)")?
+  embedding Unsupported("vector(768)")?
   updatedAt DateTime                @updatedAt
 
   @@unique([userId, facet])
@@ -89,6 +90,7 @@ model Match {
   userBId   String
   revealedA Boolean   @default(false)
   revealedB Boolean   @default(false)
+  icebreakers String[]  @default([])
   createdAt DateTime  @default(now())
   userA     User      @relation("matchA", fields: [userAId], references: [id], onDelete: Cascade)
   userB     User      @relation("matchB", fields: [userBId], references: [id], onDelete: Cascade)

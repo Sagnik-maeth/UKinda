@@ -16,7 +16,7 @@ Anonymous campus friend matching with profile embeddings, mutual connections, an
 
 ## Quick start
 
-1. Copy `.env.example` to `.env` and set a random `JWT_SECRET`.
+1. Copy `.env.example` to `.env`, set a random `JWT_SECRET`, and add a Google AI Studio API key as `GEMINI_API_KEY`.
 2. Install dependencies from the repository root and start PostgreSQL:
 
    ```sh
@@ -38,7 +38,7 @@ Anonymous campus friend matching with profile embeddings, mutual connections, an
    npm run dev
    ```
 
-Open <http://localhost:3000>. Demo sign-in uses an `@iiitr.ac.in` address and the OTP in `.env` (default: `123456`). The first local embedding run downloads the model; run `npm run warmup` ahead of a demo to cache it.
+Open <http://localhost:3000>. Demo sign-in uses an `@iiitr.ac.in` address and the OTP in `.env` (default: `123456`). Run `npm run check-gemini` to verify Gemini embeddings and text generation before onboarding.
 
 ## Useful commands
 
@@ -53,6 +53,8 @@ Open <http://localhost:3000>. Demo sign-in uses an `@iiitr.ac.in` address and th
 | `npm run build` | Build workspace packages and the web app |
 
 If Docker is unavailable, the application code can still be installed and built, but database-backed features need a PostgreSQL 16 instance with the pgvector extension.
+
+The Compose database listens on host port `5432` by default. If another local PostgreSQL service already uses that port, set both `POSTGRES_PORT` and the port in `DATABASE_URL` in `.env` to an available port (for example, `5433`).
 
 ## Privacy
 

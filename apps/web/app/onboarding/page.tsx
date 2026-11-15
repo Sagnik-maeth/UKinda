@@ -12,7 +12,13 @@ import { Navigation } from "@/components/Navigation";
 import { Slider } from "@/components/Slider";
 import { StepShell } from "@/components/StepShell";
 
-const initialProfile: ProfileInput = {
+type ProfileForm = Omit<ProfileInput, "tags" | "lookingFor" | "availability"> & {
+  tags: string[];
+  lookingFor: string[];
+  availability: string[];
+};
+
+const initialProfile: ProfileForm = {
   year: 1,
   sliders: [3, 3, 3, 3, 3, 3],
   tags: [],
@@ -36,10 +42,10 @@ type Me = { alias: string; avatarEmoji: string; year: number | null };
 type ListKey = "tags" | "lookingFor" | "availability";
 
 /** Turns a saved Profile row (+ user year) back into form state. DB nulls become "" so zod accepts them. */
-function fromSaved(saved: Record<string, unknown> | null, year: number | null): ProfileInput {
+function fromSaved(saved: Record<string, unknown> | null, year: number | null): ProfileForm {
   const next = { ...initialProfile, year: year ?? initialProfile.year };
   if (!saved) return next;
-  for (const key of Object.keys(initialProfile) as (keyof ProfileInput)[]) {
+  for (const key of Object.keys(initialProfile) as (keyof ProfileForm)[]) {
     const value = saved[key];
     if (value !== null && value !== undefined) (next as Record<string, unknown>)[key] = value;
   }
@@ -49,7 +55,7 @@ function fromSaved(saved: Record<string, unknown> | null, year: number | null): 
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [profile, setProfile] = useState<ProfileInput>(initialProfile);
+  const [profile, setProfile] = useState<ProfileForm>(initialProfile);
   const [me, setMe] = useState<Me | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -65,13 +71,13 @@ export default function OnboardingPage() {
     })().catch(() => setError("Couldn't load your profile. Refresh to try again."));
   }, [router]);
 
-  function update<K extends keyof ProfileInput>(key: K, value: ProfileInput[K]) {
+  function update<K extends keyof ProfileForm>(key: K, value: ProfileForm[K]) {
     setProfile((current) => ({ ...current, [key]: value }));
   }
 
   function toggle(key: ListKey, value: string) {
     setProfile((current) => {
-      const values = current[key] as string[];
+      const values = current[key];
       const next = values.includes(value) ? values.filter((item) => item !== value) : [...values, value];
       return { ...current, [key]: next };
     });

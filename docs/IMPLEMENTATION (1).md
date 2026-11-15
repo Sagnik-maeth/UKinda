@@ -1,6 +1,6 @@
 # 🛠️ CampusMatch: Implementation Guide (Next.js + PostgreSQL + Prisma, Monorepo)
 
-> Companion to `PLAN.md`. **This file replaces the stack in PLAN.md** (FastAPI, Chroma and SQLite → Next.js, Postgres + pgvector and Prisma).
+> Companion to `PLAN.md`. **This file replaces the stack in PLAN.md** (FastAPI, Chroma and SQLite → Next.js, Postgres + pgvector and Prisma; local sentence-transformers → **Google Gemini API, free tier**).
 > Work top to bottom. Every phase ends with a **🚩 Checkpoint**. Don't move on until it passes.
 
 ---
@@ -13,11 +13,27 @@
 | Web app | **Next.js 16 (App Router) + TypeScript + Tailwind** | API = Route Handlers. Auth guard goes in **`proxy.ts`** (Next 16 renamed `middleware.ts` to `proxy.ts`) |
 | DB | **PostgreSQL 16 + pgvector** (Docker image `pgvector/pgvector:pg16`) | Postgres **is** the vector DB. No separate service |
 | ORM | **Prisma 6** (pin `prisma@6` and `@prisma/client@6`) | Prisma 7 adds required driver adapters, `prisma.config.ts`, ESM-only output, and manual env loading. Not worth the risk in 3 hours |
-| Vector column | `Unsupported("vector(384)")` + raw SQL (`$executeRaw` / `$queryRaw`) | Prisma doesn't natively type vectors, so we use SQL for those two operations only |
-| Embeddings | **Transformers.js** (`@huggingface/transformers`) with `Xenova/all-MiniLM-L6-v2` (384-dim), running locally in Node | Fallback: OpenAI `text-embedding-3-small` with `dimensions: 384` (same column, no migration) |
+| Vector column | `Unsupported("vector(768)")` + raw SQL (`$executeRaw` / `$queryRaw`) | Prisma doesn't natively type vectors, so we use SQL for those two operations only |
+| AI SDK | **`@google/genai`** (official Gemini SDK) with a free **Google AI Studio** API key | One SDK for embeddings and text generation. No Hugging Face, no OpenAI |
+| Embeddings | **`gemini-embedding-001`**, `outputDimensionality: 768`, `taskType: "SEMANTIC_SIMILARITY"` | 768 keeps storage small and fits pgvector's HNSW index. **Vectors below 3072 dims must be L2-normalized by us** (done in `embed.ts`) |
+| Generation (fast) | **`gemini-3.5-flash-lite`** | Profile "vibe" one-liner + icebreakers. Cheap, high-volume, structured JSON output |
+| Generation (smart) | **`gemini-3.8-flash`** (fallback `gemini-3.6-flash`) | Only offline: generating the seed profiles before the hackathon |
 | Realtime chat | **Socket.IO server** in `apps/realtime` (Node + tsx) | Next.js route handlers can't hold WebSockets. Messages are saved in Postgres through the shared Prisma package |
 | Auth | Campus email + demo OTP → **JWT in an httpOnly cookie** (`jose`) | The same secret is verified by the realtime server |
 | Validation | **zod** schemas shared between client and server | |
+
+### Where Gemini is used (and what it costs in free quota)
+
+| Feature | Model | Calls | When |
+|---|---|---|---|
+| Profile facet embeddings | `gemini-embedding-001` | 1 batched call (counts as about 4 requests) | Each profile save |
+| Card "vibe" one-liner | `gemini-3.5-flash-lite` | 1 | Each profile save (optional, falls back to none) |
+| Icebreakers | `gemini-3.5-flash-lite` | 1 | Once per **new match**, stored in the DB (falls back to templates) |
+| Seed profile generation | `gemini-3.8-flash` | 6 | Once, before the hackathon |
+| Match feed | none | 0 | Pure pgvector SQL: fast and free |
+| Chat | none | 0 | Messages never go to Gemini |
+
+Rule of thumb: **one new user costs about 5 requests, one match costs 1, browsing costs 0.** The seed embeddings are cached in a committed JSON file, so reseeding is free.
 
 ---
 
@@ -65,14 +81,18 @@ campus-match/
         │   ├── aliases.ts     # "Curious Otter 🦦"
         │   ├── auth.ts        # signSession / verifySession (jose)
         │   ├── chunks.ts      # profile → 4 facet texts
-        │   ├── embed.ts       # Transformers.js singleton
+        │   ├── gemini.ts      # GoogleGenAI client + model ids + retry on 429
+        │   ├── embed.ts       # gemini-embedding-001 → normalized 768-dim vectors
+        │   ├── ai.ts          # vibe line + icebreakers (gemini-3.5-flash-lite)
         │   ├── profile.ts     # saveProfile(): DB + chunks + embeddings
         │   ├── matching.ts    # getRecommendations(): SQL + hybrid score + reasons
         │   └── index.ts
         └── scripts/
-            ├── warmup.ts      # pre-download the model
-            ├── seed.ts
-            └── seed-profiles.json
+            ├── check-gemini.ts    # verifies the API key + both models
+            ├── generate-seed.ts   # (run once, before the hackathon) writes seed-profiles.json
+            ├── seed.ts            # loads profiles, embeds with caching
+            ├── seed-profiles.json
+            └── seed-embeddings.json  # cache, so re-seeding costs 0 API calls
 ```
 
 **Ownership (3 people):**
@@ -88,10 +108,10 @@ With 4 people, D takes the realtime server and chat UI.
 
 | Clock | Phase | Owner | 🚩 Checkpoint |
 |---|---|---|---|
-| **Before start** | Phase 0: prep | All | Docker, Node ≥ 20.9 and npm ≥ 10 installed. Model cached |
+| **Before start** | Phase 0: prep | All | Docker, Node ≥ 20.9 and npm ≥ 10 installed. Gemini keys work. Seed profiles generated |
 | 0:00–0:20 | Phase 1: scaffold the monorepo | A (C helps with Next) | **CP1** `npm run dev` runs web on :3000 + realtime on :4000 |
 | 0:20–0:40 | Phase 2: DB + Prisma + pgvector | A | **CP2** migration applied, HNSW index exists |
-| 0:20–0:50 | Phase 3: core (embed, chunks, aliases) | B | **CP3** `embed(["hi"])` returns a 384-length vector |
+| 0:20–0:50 | Phase 3: core (embed, chunks, aliases) | B | **CP3** `npm run check-gemini` prints `dim = 768, norm ≈ 1` and a test vibe line |
 | 0:40–1:00 | Phase 4: auth + proxy | A | **CP4** login sets a cookie, `/api/me` works, `/matches` redirects when logged out |
 | 0:20–1:10 | Phase 5: UI (login, onboarding) | C | **CP5** onboarding submits to `PUT /api/profile` and rows + vectors land in the DB |
 | 0:50–1:20 | Phase 6: seed + matching | B | **CP6** 🎯 `/api/matches/recommendations` returns sensible top-10 |
@@ -100,7 +120,7 @@ With 4 people, D takes the realtime server and chat UI.
 | 2:15–2:35 | Phase 9: safety + polish | All | **CP9** privacy checklist passes. Feature freeze ❄️ |
 | 2:35–3:00 | Phase 10: demo prep | All | Two full rehearsals + a recorded backup video |
 
-**If you fall behind:** cut in this order: typing indicator → icebreakers → block → fancy UI. **Never cut** the seed, matching or chat.
+**If you fall behind:** cut in this order: typing indicator → AI icebreakers (keep template ones) → vibe line → block → fancy UI. **Never cut** the seed, matching or chat.
 
 ---
 
@@ -115,7 +135,12 @@ docker pull pgvector/pgvector:pg16
 - [ ] Create the GitHub repo and add everyone
 - [ ] Decide who is A, B and C
 - [ ] Pre-generate `seed-profiles.json` (about 40 profiles, see Phase 6) with an LLM *now*
-- [ ] After Phase 3 exists, run `npm run warmup -w @campus/core` on **every laptop** to cache the model (or right after scaffolding if internet is good)
+- [ ] **Gemini API keys:** go to Google AI Studio → *Get API key* → create a key. No billing account is needed for the free tier
+  - Rate limits apply **per Google Cloud project, not per key**. Each teammate should create their **own project + key** for development, and keep **one separate project's key just for the demo** so dev testing can't burn the demo quota
+  - Open the *Rate limits* page in AI Studio and note your real limits for `gemini-embedding-001` and `gemini-3.5-flash-lite`. Third-party trackers report about **100 RPM / 30K TPM / 1,000 RPD** for embeddings on the free tier, but Google only shows exact numbers in AI Studio
+  - Free-tier prompts may be used by Google to improve products and seen by human reviewers. We only ever send profile text: **never emails, real names or chat messages** (see Phase 9)
+- [ ] Run `npm run generate-seed -w @campus/core` (Phase 6.1) **before** the timer starts and commit `seed-profiles.json`. It uses `gemini-3.8-flash`
+- [ ] After Phase 3 exists, run `npm run check-gemini` on every laptop
 
 ---
 
@@ -144,7 +169,7 @@ npx create-next-app@latest apps/web --ts --tailwind --app --eslint --no-src-dir 
     "db:studio": "npm run studio -w @campus/db",
     "db:reset": "npm exec -w @campus/db -- prisma migrate reset --force",
     "seed": "npm run seed -w @campus/core",
-    "warmup": "npm run warmup -w @campus/core"
+    "check-gemini": "npm run check-gemini -w @campus/core"
   },
   "devDependencies": { "turbo": "^2", "typescript": "^5.6", "tsx": "^4" },
   "packageManager": "npm@10.9.0"
@@ -185,8 +210,11 @@ ALLOWED_EMAIL_DOMAIN="iiitr.ac.in"
 DEMO_OTP="123456"
 NEXT_PUBLIC_REALTIME_URL="http://localhost:4000"
 WEB_ORIGIN="http://localhost:3000"
-EMBEDDING_PROVIDER="local"     # or "openai"
-OPENAI_API_KEY=""
+GEMINI_API_KEY="your-ai-studio-key"   # each dev uses their own project; swap to the demo key before presenting
+GEMINI_EMBED_MODEL="gemini-embedding-001"
+GEMINI_FAST_MODEL="gemini-3.5-flash-lite"
+GEMINI_SMART_MODEL="gemini-3.8-flash"  # fallback: gemini-3.6-flash
+EMBED_DIM="768"
 ```
 ```bash
 ln -s ../../.env apps/web/.env
@@ -222,12 +250,13 @@ echo ".env" >> .gitignore   # commit a .env.example instead
   "type": "module",
   "exports": { ".": "./src/index.ts" },
   "scripts": {
-    "warmup": "tsx scripts/warmup.ts",
+    "check-gemini": "tsx --env-file=.env scripts/check-gemini.ts",
+    "generate-seed": "tsx --env-file=.env scripts/generate-seed.ts",
     "seed": "tsx --env-file=.env scripts/seed.ts"
   },
   "dependencies": {
     "@campus/db": "*",
-    "@huggingface/transformers": "^3",
+    "@google/genai": "^1",
     "jose": "^5",
     "zod": "^3"
   }
@@ -267,8 +296,7 @@ npm install socket.io-client zod jose -w web
 import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   transpilePackages: ["@campus/core", "@campus/db"],
-  // native/onnx deps must not be bundled
-  serverExternalPackages: ["@huggingface/transformers", "onnxruntime-node", "sharp"],
+  // no native ML packages any more: Gemini is just HTTPS calls
 };
 export default nextConfig;
 ```
@@ -338,6 +366,7 @@ model Profile {
   lookingForText   String
   unpopularOpinion String?
   favorites        String?
+  vibe             String?  // one-line AI summary shown on match cards (gemini-3.5-flash-lite)
   updatedAt        DateTime @updatedAt
 }
 
@@ -347,7 +376,7 @@ model ProfileChunk {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   facet     Facet
   content   String
-  embedding Unsupported("vector(384)")?
+  embedding Unsupported("vector(768)")?
   updatedAt DateTime @updatedAt
 
   @@unique([userId, facet])
@@ -372,6 +401,7 @@ model Match {
   userBId    String
   revealedA  Boolean   @default(false)
   revealedB  Boolean   @default(false)
+  icebreakers String[] // generated once by Gemini when the match is created
   createdAt  DateTime  @default(now())
   userA      User      @relation("matchA", fields: [userAId], references: [id], onDelete: Cascade)
   userB      User      @relation("matchB", fields: [userBId], references: [id], onDelete: Cascade)
@@ -481,7 +511,7 @@ export async function semanticCandidates(userId: string, limit = 50): Promise<Se
 
 ### 🚩 CP2
 - [ ] `npm run db:studio` shows all 7 tables
-- [ ] `docker exec -it <db> psql -U campus -d campusmatch -c "\d \"ProfileChunk\""` shows `embedding vector(384)` and the HNSW index
+- [ ] `docker exec -it <db> psql -U campus -d campusmatch -c "\d \"ProfileChunk\""` shows `embedding vector(768)` and the HNSW index
 
 ---
 
@@ -559,32 +589,116 @@ export async function verifySession(token: string) {
 export const SESSION_COOKIE = "cm_session";
 ```
 
+**`packages/core/src/gemini.ts`**: one client, model ids, and retry for rate limits:
+```ts
+import { GoogleGenAI } from "@google/genai";
+
+const g = globalThis as unknown as { __genai?: GoogleGenAI };
+export const ai = () => (g.__genai ??= new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! }));
+
+export const MODELS = {
+  embed: process.env.GEMINI_EMBED_MODEL ?? "gemini-embedding-001",
+  fast:  process.env.GEMINI_FAST_MODEL  ?? "gemini-3.5-flash-lite",
+  smart: process.env.GEMINI_SMART_MODEL ?? "gemini-3.8-flash",
+};
+export const EMBED_DIM = Number(process.env.EMBED_DIM ?? 768);
+
+/** Retries 429 (rate limit) and 5xx with exponential backoff. */
+export async function withRetry<T>(fn: () => Promise<T>, tries = 4): Promise<T> {
+  for (let i = 0; ; i++) {
+    try { return await fn(); }
+    catch (e: any) {
+      const status = Number(e?.status ?? e?.code ?? e?.error?.code);
+      if (i >= tries - 1 || ![429, 500, 503].includes(status)) throw e;
+      await new Promise((r) => setTimeout(r, 1000 * 2 ** i + Math.random() * 300));
+    }
+  }
+}
+```
+
 **`packages/core/src/embed.ts`**
 ```ts
-const g = globalThis as unknown as { __extractor?: Promise<any> };
+import { ai, MODELS, EMBED_DIM, withRetry } from "./gemini";
 
-async function localEmbed(texts: string[]): Promise<number[][]> {
-  if (!g.__extractor) {
-    const { pipeline } = await import("@huggingface/transformers");
-    g.__extractor = pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
-  }
-  const extractor = await g.__extractor;
-  const out = await extractor(texts, { pooling: "mean", normalize: true });
-  return out.tolist();
+// gemini-embedding-001 only returns unit-length vectors at 3072 dims.
+// At 768 we MUST normalize ourselves, or cosine/dot scores are off.
+const normalize = (v: number[]) => {
+  const n = Math.sqrt(v.reduce((s, x) => s + x * x, 0)) || 1;
+  return v.map((x) => x / n);
+};
+
+export async function embed(texts: string[]): Promise<number[][]> {
+  const res = await withRetry(() =>
+    ai().models.embedContent({
+      model: MODELS.embed,
+      contents: texts,                       // batch: all 4 facets in one call
+      config: {
+        taskType: "SEMANTIC_SIMILARITY",     // profile ↔ profile is symmetric, not query ↔ document
+        outputDimensionality: EMBED_DIM,
+      },
+    }),
+  );
+  const out = (res.embeddings ?? []).map((e) => normalize(e.values ?? []));
+  if (out.length !== texts.length || out[0]?.length !== EMBED_DIM)
+    throw new Error(`Bad embedding response (${out.length} vectors, dim ${out[0]?.length})`);
+  return out;
+}
+```
+> Why `SEMANTIC_SIMILARITY`? We compare a profile with other profiles of the same shape, so both sides are embedded the same way. Use the same task type everywhere: **vectors made with different task types shouldn't be compared.**
+> A batched call with 4 texts may count as **4 requests** against the embedding RPM. Plan quota as "4 per profile save".
+
+**`packages/core/src/ai.ts`**: the text-generation features (all optional; they fall back to templates):
+```ts
+import { Type } from "@google/genai";
+import { ai, MODELS, withRetry } from "./gemini";
+
+type Lite = { tags: string[]; weekend: string; talkAbout: string; lookingFor: string[] };
+
+const describe = (p: Lite) =>
+  `Interests: ${p.tags.join(", ")}. Perfect weekend: ${p.weekend}. Could talk for hours about: ${p.talkAbout}. Looking for: ${p.lookingFor.join(", ")}.`;
+
+/** One-line card summary. Returns null on any failure: never blocks onboarding. */
+export async function generateVibe(p: Lite): Promise<string | null> {
+  try {
+    const res = await withRetry(() => ai().models.generateContent({
+      model: MODELS.fast,
+      contents:
+        "Write ONE playful line (max 14 words, at most 1 emoji, no names, nothing that could identify the person) " +
+        "capturing this college student's vibe for an anonymous friend-matching card. Output only the line.\n\n" + describe(p),
+    }), 2);
+    return res.text?.trim().replace(/^["']|["']$/g, "").slice(0, 120) || null;
+  } catch { return null; }
 }
 
-async function openaiEmbed(texts: string[]): Promise<number[][]> {
-  const r = await fetch("https://api.openai.com/v1/embeddings", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
-    body: JSON.stringify({ model: "text-embedding-3-small", input: texts, dimensions: 384 }),
-  });
-  const j = await r.json();
-  return j.data.map((d: any) => d.embedding);
+export function templateIcebreakers(a: Lite, b: Lite): string[] {
+  const shared = a.tags.filter((t) => b.tags.includes(t));
+  return [
+    shared[0] ? `Okay, ${shared[0]} fan: what got you into it?` : "What does your perfect weekend look like?",
+    shared[1] ? `Hot take time: best thing about ${shared[1]}?` : "What's something you could talk about for hours?",
+    "Quick one: night owl or early bird? 🦉🐦",
+  ];
 }
 
-export const embed = (texts: string[]) =>
-  process.env.EMBEDDING_PROVIDER === "openai" ? openaiEmbed(texts) : localEmbed(texts);
+/** 3 opening lines, generated ONCE when a match is created and stored on Match.icebreakers. */
+export async function generateIcebreakers(a: Lite, b: Lite): Promise<string[]> {
+  try {
+    const res = await withRetry(() => ai().models.generateContent({
+      model: MODELS.fast,
+      contents:
+        "Two college students just matched on an anonymous campus friend app. Write 3 short, friendly, specific " +
+        "opening messages (max 18 words each) either could send, based on what they have in common. " +
+        "Not flirty, no names, no personal details.\n\n" +
+        `Person A: ${describe(a)}\nPerson B: ${describe(b)}`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: { type: Type.ARRAY, items: { type: Type.STRING } },
+      },
+    }), 2);
+    const arr = JSON.parse(res.text ?? "[]");
+    if (Array.isArray(arr) && arr.length) return arr.slice(0, 3).map((x) => String(x).slice(0, 160));
+  } catch { /* fall through */ }
+  return templateIcebreakers(a, b);
+}
 ```
 
 **`packages/core/src/chunks.ts`**: facet chunking (one chunk per facet, not split by length):
@@ -616,18 +730,27 @@ export function buildChunks(p: ProfileInput) {
 import { prisma, setChunkEmbedding, type Facet } from "@campus/db";
 import { buildChunks } from "./chunks";
 import { embed } from "./embed";
+import { generateVibe } from "./ai";
 import type { ProfileInput } from "./schemas";
 
-export async function saveProfile(userId: string, p: ProfileInput) {
+type Cached = { vectors: number[][]; vibe: string | null };
+
+/** Saves the profile, embeds 4 facet chunks with Gemini, and stores the vectors.
+ *  `cached` lets the seed script skip API calls entirely. Returns what it used, for caching. */
+export async function saveProfile(userId: string, p: ProfileInput, cached?: Cached): Promise<Cached> {
+  const chunks = buildChunks(p);
+  const facets = Object.keys(chunks) as Facet[];
+
+  // embedding + vibe run in parallel (2 API calls; vibe failure is ignored)
+  const [vectors, vibe] = cached
+    ? [cached.vectors, cached.vibe]
+    : await Promise.all([embed(facets.map((f) => chunks[f])), generateVibe(p)]);
+
   const { year, branch, ...rest } = p;
   await prisma.$transaction([
     prisma.user.update({ where: { id: userId }, data: { year, branch, onboarded: true } }),
-    prisma.profile.upsert({ where: { userId }, create: { userId, ...rest }, update: rest }),
+    prisma.profile.upsert({ where: { userId }, create: { userId, ...rest, vibe }, update: { ...rest, vibe } }),
   ]);
-
-  const chunks = buildChunks(p);
-  const facets = Object.keys(chunks) as Facet[];
-  const vectors = await embed(facets.map((f) => chunks[f]));   // one batched call
 
   for (let i = 0; i < facets.length; i++) {
     const facet = facets[i];
@@ -638,20 +761,35 @@ export async function saveProfile(userId: string, p: ProfileInput) {
     });
     await setChunkEmbedding(userId, facet, vectors[i]);
   }
+  return { vectors, vibe };
 }
 ```
+> Embeddings run **before** anything is written. If Gemini fails (quota, network), the request errors and the user just presses Submit again: no half-saved profile.
 
-**`packages/core/scripts/warmup.ts`**
+**`packages/core/scripts/check-gemini.ts`**
 ```ts
-import { embed } from "../src/embed";
-const v = await embed(["hello campus"]);
-console.log("model ready, dim =", v[0].length);   // expect 384
+import { embed, generateVibe } from "../src";
+
+const [a, b, c] = await embed([
+  "I love anime and late-night gaming sessions",
+  "Big manga fan, I play games till 3am",
+  "I wake up at 5 for the gym and protein shakes",
+]);
+const dot = (x: number[], y: number[]) => x.reduce((s, v, i) => s + v * y[i], 0);
+console.log("dim =", a.length, "| norm ≈", Math.sqrt(dot(a, a)).toFixed(3));
+console.log("similar pair  :", dot(a, b).toFixed(3));   // should be clearly higher…
+console.log("different pair:", dot(a, c).toFixed(3));   // …than this
+console.log("vibe:", await generateVibe({
+  tags: ["anime", "PC gaming"], weekend: "gaming marathon then biryani",
+  talkAbout: "One Piece theories", lookingFor: ["gaming squad"],
+}));
 ```
 
-**`packages/core/src/index.ts`**: re-export everything (`constants`, `schemas`, `aliases`, `auth`, `chunks`, `embed`, `profile`, `matching`).
+**`packages/core/src/index.ts`**: re-export everything (`constants`, `schemas`, `aliases`, `auth`, `gemini`, `chunks`, `embed`, `ai`, `profile`, `matching`).
 
 ### 🚩 CP3
-- [ ] `npm run warmup` prints `dim = 384` (the first run downloads about 25 MB; later runs are instant)
+- [ ] `npm run check-gemini` prints `dim = 768 | norm ≈ 1.000`, the similar pair scores clearly above the different pair, and a vibe line prints
+- [ ] Note the two similarity numbers: you'll use them to calibrate the match % in Phase 6
 - [ ] `buildChunks(sample)` prints 4 readable sentences
 
 ---
@@ -782,19 +920,20 @@ export async function GET() {
 
 Components: `Slider`, `ChipPicker`, `StepShell`, `Button`.
 
-> The first profile save takes about 2–5 seconds while the model loads in the Next server process. Call `embed(["warmup"])` once when the dev server starts (for example, open `/api/profile` GET in a tab) so the demo is instant.
+> A profile save makes 2 Gemini calls in parallel (embeddings + vibe) and takes about 1–2 s. On a `PUT /api/profile` error, keep the form state and show "Couldn't save, try again". The free tier occasionally returns 429, and `withRetry` already covers most of those.
 
 ### 🚩 CP5
 - [ ] Complete onboarding in the browser
 - [ ] In Prisma Studio, the `Profile` row exists and 4 `ProfileChunk` rows exist
-- [ ] `SELECT facet, vector_dims(embedding) FROM "ProfileChunk";` → 4 rows × 384
+- [ ] `SELECT facet, vector_dims(embedding) FROM "ProfileChunk";` → 4 rows × 768
+- [ ] The `Profile.vibe` column has a one-liner (or null if Gemini failed, which is fine)
 
 ---
 
 ## Phase 6: Seed Data + Matching Engine (B, 30 min) 🎯
 
-### 6.1 Seed data: `packages/core/scripts/seed-profiles.json`
-About 40 objects shaped like `ProfileInput` plus `email` and an optional `alias`. Spread them across these archetypes (6–7 each, plus blends):
+### 6.1 Generate seed profiles with Gemini (run once, BEFORE the hackathon)
+About 42 profiles across 6 archetypes (7 each, plus blends), plus **2 demo accounts**:
 - 🎮 **Night-owl gamer / anime**
 - 🏋️ **Gym and sports**
 - 💻 **Hackathon / CP grinder**
@@ -802,32 +941,120 @@ About 40 objects shaped like `ProfileInput` plus `email` and an optional `alias`
 - 📚 **Bookish deep-talker**
 - 🍜 **Foodie / traveler / social butterfly**
 
-Prompt to generate it in advance:
-> "Generate 40 JSON profiles of Indian engineering college students for a friend-matching app, matching this TypeScript type: {…paste ProfileInput…, email}. Use 6 archetypes (…). Make the free text casual, specific and varied (mention real games, shows, cafés-in-general, Hyderabad/Raichur campus life). Emails like seed01@iiitr.ac.in. Output only a JSON array."
-
-Also add **2 demo accounts** (`demo1@iiitr.ac.in`, `demo2@iiitr.ac.in`) with near-identical interests so they match each other at the top.
-
-### 6.2 `packages/core/scripts/seed.ts`
+**`packages/core/scripts/generate-seed.ts`**: uses `gemini-3.8-flash` with structured JSON output, one call per archetype (6 calls total):
 ```ts
+import { writeFileSync } from "node:fs";
+import { Type } from "@google/genai";
+import { ai, MODELS, withRetry } from "../src/gemini";
+import { TAG_GROUPS, LOOKING_FOR, AVAILABILITY } from "../src/constants";
+import { ProfileInput } from "../src/schemas";
+
+const ALL_TAGS = Object.values(TAG_GROUPS).flat() as string[];
+const ARCHETYPES = [
+  "night-owl gamer who loves anime", "gym and sports enthusiast", "hackathon and competitive programming grinder",
+  "musician / artist / creative", "bookish deep-talker", "foodie, traveler and social butterfly",
+];
+const str = { type: Type.STRING };
+const profileSchema = {
+  type: Type.OBJECT,
+  properties: {
+    year: { type: Type.INTEGER }, branch: str,
+    sliders: { type: Type.ARRAY, items: { type: Type.INTEGER } },
+    tags: { type: Type.ARRAY, items: { type: Type.STRING, enum: ALL_TAGS } },
+    lookingFor: { type: Type.ARRAY, items: { type: Type.STRING, enum: [...LOOKING_FOR] } },
+    availability: { type: Type.ARRAY, items: { type: Type.STRING, enum: [...AVAILABILITY] } },
+    weekend: str, talkAbout: str, lookingForText: str, unpopularOpinion: str, favorites: str,
+  },
+  required: ["year", "sliders", "tags", "lookingFor", "availability", "weekend", "talkAbout", "lookingForText"],
+};
+
+const out: any[] = [];
+for (const [i, archetype] of ARCHETYPES.entries()) {
+  const res = await withRetry(() => ai().models.generateContent({
+    model: MODELS.smart,
+    contents:
+      `Generate 7 distinct profiles of Indian engineering college students (IIIT campus) for an anonymous friend-matching app. ` +
+      `Archetype: ${archetype}. Make 2 of them blends with another interest. year is 1-4, sliders is exactly 6 integers 1-5 ` +
+      `(introvert→extrovert, planner→spontaneous, light→deep talk, comfort→novelty, chill→competitive, early bird→night owl). ` +
+      `tags: 4-8 items. Free text: casual, specific, varied, 1-2 sentences, no real names.`,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: { type: Type.ARRAY, items: profileSchema },
+    },
+  }));
+  for (const [j, p] of JSON.parse(res.text ?? "[]").entries()) {
+    const parsed = ProfileInput.safeParse({ ...p, sliders: p.sliders?.slice(0, 6), tags: p.tags?.slice(0, 10) });
+    if (parsed.success) out.push({ email: `seed${String(i * 10 + j).padStart(2, "0")}@iiitr.ac.in`, ...parsed.data });
+    else console.warn("skipped invalid profile", parsed.error.issues[0]);
+  }
+  console.log(`✓ ${archetype}`);
+}
+
+// two hand-written demo accounts that should match each other at the top
+const demo = {
+  year: 2, sliders: [2, 4, 5, 4, 2, 5], tags: ["anime", "PC gaming", "hackathons", "memes", "food & cafés"],
+  lookingFor: ["gaming squad", "project/hackathon teammate"], availability: ["late night", "weekends"],
+  weekend: "Valorant till 3am, then a late breakfast and anime marathon",
+  talkAbout: "One Piece theories and building side projects nobody asked for",
+  lookingForText: "Someone to queue ranked with and maybe build a hackathon project",
+  favorites: "Jujutsu Kaisen, Valorant, lo-fi playlists",
+};
+out.push({ email: "demo1@iiitr.ac.in", ...demo });
+out.push({ email: "demo2@iiitr.ac.in", ...demo, weekend: "Gaming all night with friends, then sleeping till noon and watching anime" });
+
+writeFileSync(new URL("./seed-profiles.json", import.meta.url), JSON.stringify(out, null, 2));
+console.log(`wrote ${out.length} profiles`);
+```
+```bash
+npm run generate-seed -w @campus/core     # about 1 min, 6 requests to gemini-3.8-flash
+```
+Open `seed-profiles.json`, skim it, fix anything weird by hand, and **commit it**. If `gemini-3.8-flash` hits its free limit, set `GEMINI_SMART_MODEL=gemini-3.6-flash` and rerun.
+
+### 6.2 `packages/core/scripts/seed.ts`: embeds with a cache and a throttle
+The first run makes about 44 × (4 embeddings + 1 vibe) requests, paced to stay under the free-tier RPM. It writes `seed-embeddings.json`, so **every later reseed costs 0 API calls**. This matters because you'll reset the DB several times during the day and the daily quota (RPD) is small.
+```ts
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { prisma } from "@campus/db";
-import { randomAlias, saveProfile, ProfileInput } from "../src";
+import { randomAlias, saveProfile, buildChunks, ProfileInput } from "../src";
 import data from "./seed-profiles.json" with { type: "json" };
+
+const CACHE = new URL("./seed-embeddings.json", import.meta.url);
+const cache: Record<string, { hash: string; vectors: number[][]; vibe: string | null }> =
+  existsSync(CACHE) ? JSON.parse(readFileSync(CACHE, "utf8")) : {};
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 for (const raw of data as any[]) {
   const { email, alias, ...p } = raw;
   const input = ProfileInput.parse(p);
+  const hash = createHash("sha1").update(JSON.stringify(buildChunks(input))).digest("hex");
   const user = await prisma.user.upsert({
     where: { email }, update: {},
     create: { email, ...randomAlias(), ...(alias ? { alias } : {}) },
   });
-  await saveProfile(user.id, input);
-  console.log("✓", email);
+
+  const hit = cache[email]?.hash === hash ? cache[email] : undefined;
+  const used = await saveProfile(user.id, input, hit);
+  if (!hit) {
+    cache[email] = { hash, ...used };
+    writeFileSync(CACHE, JSON.stringify(cache));   // save as we go, in case we hit a limit midway
+    await sleep(3000);                              // ≈ 20 profiles/min ≈ 80 embed requests/min
+  }
+  console.log(hit ? "↺ cached" : "✓ embedded", email);
 }
+
+// demo setup: demo2 has already pressed Connect on demo1
+const [d1, d2] = await Promise.all(["demo1@iiitr.ac.in", "demo2@iiitr.ac.in"].map((email) => prisma.user.findUnique({ where: { email } })));
+if (d1 && d2) await prisma.like.upsert({
+  where: { fromUserId_toUserId: { fromUserId: d2.id, toUserId: d1.id } },
+  create: { fromUserId: d2.id, toUserId: d1.id, action: "CONNECT" }, update: { action: "CONNECT" },
+});
 await prisma.$disconnect();
 ```
 ```bash
-npm run seed      # about 30–60 s on CPU
+npm run seed      # first run about 2–3 min (throttled), then a few seconds
 ```
+**Commit `seed-embeddings.json` too**, so teammates and the demo machine can seed without using any quota.
 
 ### 6.3 `packages/core/src/matching.ts`: hybrid scoring
 ```ts
@@ -838,7 +1065,10 @@ const jaccard = (a: string[], b: string[]) => {
   const inter = [...A].filter((x) => B.has(x)).length;
   return inter / (new Set([...a, ...b]).size || 1);
 };
-const toPct = (s: number) => Math.round(Math.min(98, Math.max(55, 55 + ((s - 0.2) / 0.5) * 43)));
+// Gemini similarities sit in a narrow, high band (roughly 0.55–0.9). Calibrate LOW/HIGH from
+// what check-gemini and CP6 print, so the UI shows a friendly 55–98% spread.
+const LOW = 0.55, HIGH = 0.85;
+const toPct = (s: number) => Math.round(Math.min(98, Math.max(55, 55 + ((s - LOW) / (HIGH - LOW)) * 43)));
 const FACET_REASON: Record<string, string> = {
   PERSONALITY: "similar personalities", INTERESTS: "overlapping interests",
   LIFESTYLE: "similar weekend vibes", INTENT: "want the same kind of friendship",
@@ -851,7 +1081,7 @@ export async function getRecommendations(userId: string, take = 10) {
   const rows = await semanticCandidates(userId, 50);
   const others = await prisma.user.findMany({
     where: { id: { in: rows.map((r) => r.userId) }, onboarded: true },
-    select: { id: true, alias: true, avatarEmoji: true, year: true, profile: { select: { tags: true, lookingFor: true } } },
+    select: { id: true, alias: true, avatarEmoji: true, year: true, profile: { select: { tags: true, lookingFor: true, vibe: true } } },
   });
   const byId = new Map(others.map((o) => [o.id, o]));
 
@@ -876,11 +1106,11 @@ export async function getRecommendations(userId: string, take = 10) {
       ? `Ask them about their favourite thing in ${sharedTags[0]} 👀`
       : `Ask about their perfect weekend 🌤️`;
 
-    return [{ userId: o.id, alias: o.alias, avatarEmoji: o.avatarEmoji, year: o.year,
-              tags: o.profile.tags, score: toPct(final), reasons, icebreaker }];
+    return [{ userId: o.id, alias: o.alias, avatarEmoji: o.avatarEmoji, year: o.year, vibe: o.profile.vibe,
+              tags: o.profile.tags, score: toPct(final), raw: final, reasons, icebreaker }];
   });
 
-  scored.sort((a, b) => b.score - a.score);
+  scored.sort((a, b) => b.raw - a.raw);
   return scored.slice(0, take);
 }
 ```
@@ -892,6 +1122,8 @@ export async function getRecommendations(userId: string, take = 10) {
 - [ ] Log in as `demo1`, then call `GET /api/matches/recommendations`. `demo2` should be in the top 3
 - [ ] A gamer seed profile's top results are mostly gamers/anime people (sanity-check 3 archetypes)
 - [ ] If results feel off, adjust `FACET_WEIGHTS` and the 0.7/0.2/0.1 split. Don't touch anything else
+- [ ] Log `raw` for the top and bottom results, and set `LOW`/`HIGH` in `matching.ts` so the best matches show about 90%+ and weak ones about 60%
+- [ ] Cards show the Gemini `vibe` line. **No Gemini calls happen when loading recommendations**: it's pure pgvector + SQL, so the feed is fast and costs no quota
 
 ---
 
@@ -902,6 +1134,7 @@ export async function getRecommendations(userId: string, take = 10) {
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@campus/db";
+import { generateIcebreakers } from "@campus/core";
 import { requireUserId } from "@/lib/session";
 
 const Body = z.object({ targetId: z.string(), action: z.enum(["CONNECT", "SKIP"]) });
@@ -925,9 +1158,21 @@ export async function POST(req: Request) {
     if (back?.action !== "CONNECT") return NextResponse.json({ matched: false });
 
     const [userAId, userBId] = [me, targetId].sort();
-    const match = await prisma.match.upsert({
-      where: { userAId_userBId: { userAId, userBId } }, create: { userAId, userBId }, update: {},
-    });
+    const where = { userAId_userBId: { userAId, userBId } };
+    let match = await prisma.match.findUnique({ where });
+    if (!match) {
+      // 1 Gemini call per NEW match (not per page view), stored forever
+      const [pa, pb] = await Promise.all([
+        prisma.profile.findUnique({ where: { userId: userAId } }),
+        prisma.profile.findUnique({ where: { userId: userBId } }),
+      ]);
+      const icebreakers = pa && pb ? await generateIcebreakers(pa, pb) : [];
+      try {
+        match = await prisma.match.create({ data: { userAId, userBId, icebreakers } });
+      } catch {
+        match = await prisma.match.findUniqueOrThrow({ where });   // both clicked at the same moment
+      }
+    }
     return NextResponse.json({ matched: true, matchId: match.id });
   } catch (e) { if (e instanceof Response) return e; throw e; }
 }
@@ -948,7 +1193,7 @@ const matches = await prisma.match.findMany({
 ```
 
 **UI: `/matches`**
-- A grid or list of `MatchCard`: big emoji, alias, "2nd year", **match % badge**, reason bullets, up to 5 tags, and an icebreaker line
+- A grid or list of `MatchCard`: big emoji, alias, "2nd year", **match % badge**, the italic Gemini **vibe line**, reason bullets, up to 5 tags
 - **Connect 💚 / Skip ✖** buttons. Remove the card optimistically. If `matched: true`, show the **"It's a match! 🎉"** modal with a "Say hi" button that goes to `/chats/{matchId}`
 - Empty state: "You've seen everyone for now. Check back later 👀"
 
@@ -1020,7 +1265,7 @@ http.listen(4000, () => console.log("realtime on :4000"));
 ```
 
 **History API: `apps/web/app/api/chats/[matchId]/messages/route.ts`**
-- `GET`: verify that I'm `userAId` or `userBId` of the match, else 404. Return the last 50 messages ascending: `{ id, senderId, text, createdAt }`
+- `GET`: verify that I'm `userAId` or `userBId` of the match, else 404. Return `{ messages, icebreakers }`: the last 50 messages ascending (`{ id, senderId, text, createdAt }`) and `match.icebreakers`
 - *(Fallback if sockets break during the demo:* a `POST` here that creates a message, plus client polling every 2 s. Build this only if needed.)*
 
 **Client hook: `apps/web/lib/useChat.ts`**
@@ -1034,13 +1279,14 @@ export type Msg = { id: string; senderId: string; text: string; createdAt: strin
 export function useChat(matchId: string) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [peerTyping, setPeerTyping] = useState(false);
+  const [icebreakers, setIcebreakers] = useState<string[]>([]);
   const sock = useRef<Socket | null>(null);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       const hist = await fetch(`/api/chats/${matchId}/messages`).then((r) => r.json());
-      if (alive) setMessages(hist);
+      if (alive) { setMessages(hist.messages); setIcebreakers(hist.icebreakers ?? []); }
       const { token } = await fetch("/api/auth/realtime-token").then((r) => r.json());
       const s = io(process.env.NEXT_PUBLIC_REALTIME_URL!, { auth: { token } });
       sock.current = s;
@@ -1052,7 +1298,7 @@ export function useChat(matchId: string) {
   }, [matchId]);
 
   return {
-    messages, peerTyping,
+    messages, peerTyping, icebreakers,
     send: (text: string) => sock.current?.emit("message:send", { matchId, text }),
     typing: () => sock.current?.emit("typing", matchId),
   };
@@ -1062,7 +1308,7 @@ export function useChat(matchId: string) {
 **UI: `/chats/[matchId]`**
 - Header: other person's emoji + alias, plus a "⋯" menu (Block)
 - Message list: my bubbles on the right, theirs on the left. Auto-scroll to the bottom
-- If there are no messages: show icebreaker chips (from shared tags). Clicking one fills the input
+- If there are no messages: show the 3 Gemini **icebreaker chips** (`icebreakers` from the hook). Clicking one fills the input
 - Input + Send (Enter to send). Call `typing()` on keypress (throttled)
 - Render text as plain text only (no `dangerouslySetInnerHTML`)
 
@@ -1084,6 +1330,8 @@ export function useChat(matchId: string) {
 - [ ] Message length is capped at 1000, and empty messages are dropped
 - [ ] Non-campus emails are rejected (CP4 test)
 - [ ] `.env` is not committed; `.env.example` is committed
+- [ ] **Data sent to Gemini is profile text only.** Check `chunks.ts` and `ai.ts`: no email, no realName, no alias, **no chat messages**. On the free tier, Google may use prompts to improve products and humans may review them. Mention this in your privacy note, and say that a paid tier or self-hosted model is the production path
+- [ ] `GEMINI_API_KEY` is only used server-side: never in a `NEXT_PUBLIC_*` variable and never imported in a client component
 
 ### Polish
 - [ ] Loading skeletons on `/matches`, a spinner on onboarding submit
@@ -1099,7 +1347,8 @@ export function useChat(matchId: string) {
 ## Phase 10: Demo Prep (25 min)
 
 - [ ] **Reset script:** `npm run db:reset && npm run seed` (`db:reset` is already in the root scripts). Run it, then pre-create the `demo2 → demo1` connect
-- [ ] Warm the model: hit any profile save once before presenting
+- [ ] Switch `GEMINI_API_KEY` to the **demo project's key**, restart, and run `npm run check-gemini` 10 minutes before presenting. Check that AI Studio shows quota left for today
+- [ ] Reseed using the committed `seed-embeddings.json` (0 API calls)
 - [ ] Two windows side by side: normal (demo1) and incognito (demo2)
 - [ ] Rehearse the 2-minute script in `PLAN.md` §12 **twice**
 - [ ] Record a screen capture of the full flow as a backup
@@ -1114,8 +1363,12 @@ export function useChat(matchId: string) {
 | `type "vector" does not exist` | You're not on the `pgvector/pgvector` image, or the migration lacks `CREATE EXTENSION`. Check that `extensions = [vector]` is in the datasource and re-run `migrate dev` |
 | Prisma Studio errors on `embedding` | Expected (Unsupported type). Ignore it and check with psql |
 | `operator does not exist: "Facet" = text` | Cast: `facet = ${facet}::"Facet"` or `me.facet::text` (already in the SQL above) |
-| Next build/dev error about `onnxruntime-node` / `.node` file | Make sure `serverExternalPackages` includes `@huggingface/transformers` and `onnxruntime-node`. As a last resort, set `EMBEDDING_PROVIDER=openai` |
-| Embeddings very slow the first time | The model is downloading or loading. Run `warmup`, and keep the dev server running |
+| `429 RESOURCE_EXHAUSTED` from Gemini | You hit a free-tier limit (RPM, TPM or RPD). `withRetry` handles short bursts. For daily limits, switch to another teammate's project key. Never re-embed seed data: use the cache |
+| `400` / `API key not valid` | The key is wrong or missing in the `.env` that process reads. Check the symlinks, and restart `npm run dev` after editing `.env` |
+| `expected 768 dimensions, not 3072` from Postgres | `outputDimensionality` didn't reach the API. Check that `EMBED_DIM=768` and that `embed.ts` passes it inside `config` |
+| All match % look the same (for example all 95%) | Vectors not normalized, or `LOW`/`HIGH` not calibrated. Rerun `check-gemini` and adjust |
+| `models/gemini-3.x… not found` | Model ids change over time. Check the models page in AI Studio, and update `GEMINI_FAST_MODEL` / `GEMINI_SMART_MODEL` in `.env` (no code change needed) |
+| Vibe or icebreakers missing | They fail silently by design (null / template fallback). Check the server log for the Gemini error |
 | `@prisma/client did not initialize yet` | Run `npm run db:generate` |
 | Socket `unauthorized` | `JWT_SECRET` differs between web and realtime. Check that the `.env` symlinks exist |
 | Socket CORS error | `WEB_ORIGIN` must exactly equal `http://localhost:3000` |

@@ -1,4 +1,5 @@
 import { prisma, semanticCandidates } from "@campus/db";
+import { FACET_WEIGHTS } from "./constants";
 
 const FACET_REASON: Record<string, string> = {
   PERSONALITY: "similar personalities",
@@ -7,6 +8,13 @@ const FACET_REASON: Record<string, string> = {
   INTENT: "want the same kind of friendship",
 };
 
+// Gemini similarities sit in a narrow, high band (roughly 0.55–0.9). Calibrate LOW/HIGH from
+// the `raw` values logged with MATCH_DEBUG=1 so the UI shows a friendly 55–98% spread.
+const LOW = Number(process.env.MATCH_LOW ?? 0.55);
+const HIGH = Number(process.env.MATCH_HIGH ?? 0.85);
+const toPercent = (raw: number) =>
+  Math.round(Math.min(98, Math.max(55, 55 + ((raw - LOW) / (HIGH - LOW)) * 43)));
+
 function jaccard(first: string[], second: string[]) {
   const firstSet = new Set(first);
   const secondSet = new Set(second);
@@ -14,36 +22,50 @@ function jaccard(first: string[], second: string[]) {
   return intersection / (new Set([...firstSet, ...secondSet]).size || 1);
 }
 
-function toPercent(score: number) {
-  return Math.round(Math.min(98, Math.max(55, 55 + ((score - 0.2) / 0.5) * 43)));
-}
+export type Recommendation = {
+  userId: string;
+  alias: string;
+  avatarEmoji: string;
+  year: number | null;
+  vibe: string | null;
+  tags: string[];
+  score: number;
+  raw: number;
+  reasons: string[];
+  icebreaker: string;
+};
 
-export async function getRecommendations(userId: string, take = 10) {
-  const profile = await prisma.profile.findUnique({ where: { userId } });
-  if (!profile) return [];
+// Safe public fields only: never select email or realName here.
+const publicSelect = {
+  id: true,
+  alias: true,
+  avatarEmoji: true,
+  year: true,
+  profile: { select: { tags: true, lookingFor: true, vibe: true } },
+} as const;
 
-  const rows = await semanticCandidates(userId, 50);
-  const users = await prisma.user.findMany({
+export async function getRecommendations(userId: string, take = 10): Promise<Recommendation[]> {
+  const me = await prisma.profile.findUnique({ where: { userId } });
+  if (!me) return [];
+
+  const rows = await semanticCandidates(userId, 50, FACET_WEIGHTS);
+  const others = await prisma.user.findMany({
     where: { id: { in: rows.map((row) => row.userId) }, onboarded: true },
-    select: {
-      id: true,
-      alias: true,
-      avatarEmoji: true,
-      year: true,
-      profile: { select: { tags: true, lookingFor: true } },
-    },
+    select: publicSelect,
   });
-  const userById = new Map(users.map((user) => [user.id, user]));
-  const recommendations = rows.flatMap((row) => {
-    const other = userById.get(row.userId);
+  const byId = new Map(others.map((other) => [other.id, other]));
+
+  const scored: Recommendation[] = rows.flatMap((row) => {
+    const other = byId.get(row.userId);
     if (!other?.profile) return [];
 
-    const sharedTags = other.profile.tags.filter((tag) => profile.tags.includes(tag));
-    const sharedIntents = other.profile.lookingFor.filter((item) => profile.lookingFor.includes(item));
-    const score =
+    const sharedTags = other.profile.tags.filter((tag) => me.tags.includes(tag));
+    const sharedIntents = other.profile.lookingFor.filter((item) => me.lookingFor.includes(item));
+    const raw =
       0.7 * row.semantic +
-      0.2 * jaccard(profile.tags, other.profile.tags) +
+      0.2 * jaccard(me.tags, other.profile.tags) +
       0.1 * (sharedIntents.length > 0 ? 1 : 0);
+
     const topFacet = Object.entries(row.facets).sort((a, b) => b[1] - a[1])[0]?.[0];
     const reasons = [
       sharedTags.length ? `You both like ${sharedTags.slice(0, 3).join(", ")}` : null,
@@ -56,8 +78,10 @@ export async function getRecommendations(userId: string, take = 10) {
       alias: other.alias,
       avatarEmoji: other.avatarEmoji,
       year: other.year,
+      vibe: other.profile.vibe,
       tags: other.profile.tags,
-      score: toPercent(score),
+      score: toPercent(raw),
+      raw,
       reasons,
       icebreaker: sharedTags[0]
         ? `Ask them about their favourite thing in ${sharedTags[0]} 👀`
@@ -65,48 +89,55 @@ export async function getRecommendations(userId: string, take = 10) {
     }];
   });
 
-  const seen = new Set(recommendations.map((item) => item.userId));
-  if (recommendations.length < Math.min(5, take)) {
-    const excludedLikes = await prisma.like.findMany({
-      where: { fromUserId: userId },
-      select: { toUserId: true },
-    });
-    const blocked = await prisma.block.findMany({
-      where: { OR: [{ blockerId: userId }, { blockedId: userId }] },
-      select: { blockerId: true, blockedId: true },
-    });
-    const excludedIds = new Set([
-      userId,
-      ...excludedLikes.map((like) => like.toUserId),
-      ...blocked.flatMap((item) => [item.blockerId, item.blockedId]),
-      ...seen,
+  scored.sort((a, b) => b.raw - a.raw);
+  const results = scored.slice(0, take);
+
+  // Cold-start fallback: top up with random onboarded users who aren't excluded.
+  if (results.length < Math.min(5, take)) {
+    const [likes, blocks] = await Promise.all([
+      prisma.like.findMany({ where: { fromUserId: userId }, select: { toUserId: true } }),
+      prisma.block.findMany({
+        where: { OR: [{ blockerId: userId }, { blockedId: userId }] },
+        select: { blockerId: true, blockedId: true },
+      }),
     ]);
+    const excluded = [...new Set([
+      userId,
+      ...results.map((item) => item.userId),
+      ...likes.map((like) => like.toUserId),
+      ...blocks.flatMap((block) => [block.blockerId, block.blockedId]),
+    ])];
+    const randomIds = await prisma.$queryRaw<{ id: string }[]>`
+      SELECT u.id FROM "User" u
+      JOIN "Profile" p ON p."userId" = u.id
+      WHERE u.onboarded = true AND NOT (u.id = ANY(${excluded}::text[]))
+      ORDER BY random()
+      LIMIT ${take - results.length}`;
     const fallback = await prisma.user.findMany({
-      where: {
-        onboarded: true,
-        id: { notIn: [...excludedIds] },
-        profile: { isNot: null },
-      },
-      select: {
-        id: true,
-        alias: true,
-        avatarEmoji: true,
-        year: true,
-        profile: { select: { tags: true } },
-      },
-      take: Math.max(0, take - recommendations.length),
+      where: { id: { in: randomIds.map((row) => row.id) } },
+      select: publicSelect,
     });
-    recommendations.push(...fallback.flatMap((other) => other.profile ? [{
-      userId: other.id,
-      alias: other.alias,
-      avatarEmoji: other.avatarEmoji,
-      year: other.year,
-      tags: other.profile.tags,
-      score: 55,
-      reasons: ["New on campus 👋"],
-      icebreaker: "Ask about their perfect weekend 🌤️",
-    }] : []));
+    for (const other of fallback) {
+      if (!other.profile) continue;
+      results.push({
+        userId: other.id,
+        alias: other.alias,
+        avatarEmoji: other.avatarEmoji,
+        year: other.year,
+        vibe: other.profile.vibe,
+        tags: other.profile.tags,
+        score: 55,
+        raw: 0,
+        reasons: ["New on campus 👋"],
+        icebreaker: "Ask about their perfect weekend 🌤️",
+      });
+    }
   }
 
-  return recommendations.sort((a, b) => b.score - a.score).slice(0, take);
+  if (process.env.MATCH_DEBUG === "1" && results.length) {
+    const fmt = (item: Recommendation) => `${item.alias} raw=${item.raw.toFixed(3)} → ${item.score}%`;
+    console.log(`[matching] top: ${fmt(results[0])} | bottom: ${fmt(results[results.length - 1])}`);
+  }
+
+  return results;
 }
