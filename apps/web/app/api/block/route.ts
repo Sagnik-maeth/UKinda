@@ -18,9 +18,14 @@ export async function POST(request: Request) {
     if (!parsed.success || parsed.data.targetId === userId) {
       return NextResponse.json({ error: "Invalid profile" }, { status: 400 });
     }
+    const { targetId } = parsed.data;
+    // Unknown IDs would otherwise fail the foreign key and surface as a 500.
+    const target = await prisma.user.findUnique({ where: { id: targetId }, select: { id: true } });
+    if (!target) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+
     await prisma.block.upsert({
-      where: { blockerId_blockedId: { blockerId: userId, blockedId: parsed.data.targetId } },
-      create: { blockerId: userId, blockedId: parsed.data.targetId },
+      where: { blockerId_blockedId: { blockerId: userId, blockedId: targetId } },
+      create: { blockerId: userId, blockedId: targetId },
       update: {},
     });
     return NextResponse.json({ ok: true });
