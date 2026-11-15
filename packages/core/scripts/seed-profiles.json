@@ -1,0 +1,1434 @@
+[
+  {
+    "email": "seed00@iiitr.ac.in",
+    "year": 2,
+    "branch": "CSE",
+    "sliders": [
+      2,
+      2,
+      4,
+      3,
+      5,
+      5
+    ],
+    "tags": [
+      "PC gaming",
+      "anime",
+      "web series",
+      "memes"
+    ],
+    "lookingFor": [
+      "gaming squad",
+      "hangout friends"
+    ],
+    "availability": [
+      "late night",
+      "weekends"
+    ],
+    "weekend": "Grinding competitive Valorant until 4 AM then binge-watching seasonal anime with cold coffee.",
+    "talkAbout": "Tactical shooter metas, Steins;Gate worldlines, and why most modern isekai are pure trash.",
+    "lookingForText": "Need a reliable 5-stack that communicates and doesn't tilt after losing pistol round.",
+    "unpopularOpinion": "Single player story games hit infinitely harder than any modern multiplayer shooter.",
+    "favorites": "Hunter x Hunter, Apex Legends, Maggi with cheese slice"
+  },
+  {
+    "email": "seed01@iiitr.ac.in",
+    "year": 1,
+    "branch": "ECE",
+    "sliders": [
+      1,
+      1,
+      3,
+      2,
+      4,
+      5
+    ],
+    "tags": [
+      "PC gaming",
+      "anime",
+      "chess",
+      "reading"
+    ],
+    "lookingFor": [
+      "gaming squad",
+      "study buddy"
+    ],
+    "availability": [
+      "late night"
+    ],
+    "weekend": "Playing dark souls or rhythm games in my room while keeping campus noise locked outside.",
+    "talkAbout": "Berserk lore, FromSoftware world-building, and late-90s anime soundtracks.",
+    "lookingForText": "Someone chill who wants to hop on co-op games or silently parallel-study past 1 AM.",
+    "unpopularOpinion": "Subtitles are strictly superior to dubs, no exceptions ever.",
+    "favorites": "Elden Ring, Neon Genesis Evangelion, lofi hip hop"
+  },
+  {
+    "email": "seed02@iiitr.ac.in",
+    "year": 3,
+    "branch": "IT",
+    "sliders": [
+      3,
+      4,
+      2,
+      3,
+      3,
+      5
+    ],
+    "tags": [
+      "PC gaming",
+      "mobile gaming",
+      "anime",
+      "memes",
+      "food & cafés"
+    ],
+    "lookingFor": [
+      "gaming squad",
+      "hangout friends"
+    ],
+    "availability": [
+      "evenings",
+      "late night",
+      "weekends"
+    ],
+    "weekend": "Custom CS2 lobbies with hostel wingmates followed by a late night maggi run near the main gate.",
+    "talkAbout": "Esports tournaments, Jujutsu Kaisen manga leaks, and finding the best shawarma near campus.",
+    "lookingForText": "Looking for casual gamers to play party games or random steam sales co-ops without taking it too seriously.",
+    "unpopularOpinion": "Gacha mechanics completely ruined modern anime-inspired games.",
+    "favorites": "CS:GO/CS2, Chainsaw Man, midnight canteen chai"
+  },
+  {
+    "email": "seed03@iiitr.ac.in",
+    "year": 4,
+    "branch": "CSE",
+    "sliders": [
+      1,
+      2,
+      5,
+      2,
+      2,
+      5
+    ],
+    "tags": [
+      "anime",
+      "PC gaming",
+      "drawing",
+      "writing"
+    ],
+    "lookingFor": [
+      "deep talks",
+      "hangout friends"
+    ],
+    "availability": [
+      "late night",
+      "weekends"
+    ],
+    "weekend": "Drawing digital fanart on my tablet with a vintage slice-of-life anime playing on my second monitor.",
+    "talkAbout": "Narrative pacing in shonen vs seinen, Japanese animation techniques, and obscure indie game plots.",
+    "lookingForText": "Looking for fellow creative night owls who appreciate deep talks on art, lore, and late-night philosophy.",
+    "unpopularOpinion": "Plot armor is fine if the emotional payoff genuinely hits.",
+    "favorites": "Mob Psycho 100, Hollow Knight, Pentel brush pens"
+  },
+  {
+    "email": "seed04@iiitr.ac.in",
+    "year": 2,
+    "branch": "CSAI",
+    "sliders": [
+      2,
+      3,
+      4,
+      4,
+      4,
+      5
+    ],
+    "tags": [
+      "PC gaming",
+      "anime",
+      "coding",
+      "web dev",
+      "hackathons"
+    ],
+    "lookingFor": [
+      "project/hackathon teammate",
+      "gaming squad"
+    ],
+    "availability": [
+      "late night",
+      "weekends"
+    ],
+    "weekend": "Switching between writing React components at 2 AM and queuing up for fighting games.",
+    "talkAbout": "WebAssembly, game engine mechanics, and analyzing tournament arcs in anime.",
+    "lookingForText": "A dev partner who can code through hackathon nights and unwind with Tekken or Guilty Gear breaks.",
+    "unpopularOpinion": "Building a game is way more fun than actually grinding ranked ladders.",
+    "favorites": "Guilty Gear Strive, Gurren Lagann, VS Code night owl theme"
+  },
+  {
+    "email": "seed05@iiitr.ac.in",
+    "year": 3,
+    "branch": "ECE",
+    "sliders": [
+      3,
+      2,
+      3,
+      4,
+      5,
+      5
+    ],
+    "tags": [
+      "PC gaming",
+      "anime",
+      "gym",
+      "running"
+    ],
+    "lookingFor": [
+      "gym buddy",
+      "gaming squad"
+    ],
+    "availability": [
+      "evenings",
+      "late night"
+    ],
+    "weekend": "Heavy deadlifts in the evening gym slot followed by Discord watch parties and Dota matches till dawn.",
+    "talkAbout": "Training splits inspired by anime training arcs, Dota patch notes, and hype battle shonen fights.",
+    "lookingForText": "Need someone to spot my late-evening bench presses and then carry me in Dota afterwards.",
+    "unpopularOpinion": "The gym playlist is incomplete without hype anime openings.",
+    "favorites": "Dota 2, Baki, whey protein mixed in cold milk"
+  },
+  {
+    "email": "seed06@iiitr.ac.in",
+    "year": 1,
+    "branch": "CSE",
+    "sliders": [
+      2,
+      4,
+      4,
+      3,
+      3,
+      5
+    ],
+    "tags": [
+      "anime",
+      "PC gaming",
+      "memes",
+      "movies"
+    ],
+    "lookingFor": [
+      "hangout friends",
+      "gaming squad"
+    ],
+    "availability": [
+      "late night",
+      "weekends"
+    ],
+    "weekend": "Hopping between Discord calls, trying random indie roguelikes, and starting anime series I'll finish in one sitting.",
+    "talkAbout": "Monogatari series watch order, rogue-like deckbuilders, and weird internet rabbit holes.",
+    "lookingForText": "Just want fellow freshers who stay awake past 3 AM to shoot the breeze and game without drama.",
+    "unpopularOpinion": "Fillers in long-running 2000s anime actually gave characters the best worldbuilding.",
+    "favorites": "Hades, Vinland Saga, instant ramen hacks"
+  },
+  {
+    "email": "seed10@iiitr.ac.in",
+    "year": 2,
+    "branch": "Mechanical Engineering",
+    "sliders": [
+      4,
+      3,
+      2,
+      4,
+      5,
+      1
+    ],
+    "tags": [
+      "gym",
+      "cricket",
+      "badminton",
+      "running",
+      "food & cafés"
+    ],
+    "lookingFor": [
+      "gym buddy",
+      "hangout friends"
+    ],
+    "availability": [
+      "mornings",
+      "evenings"
+    ],
+    "weekend": "Hitting the campus gym at 6 AM, followed by a massive mess breakfast and watching IPL matches all evening.",
+    "talkAbout": "Workout splits, progressive overload, and why Virat Kohli's 183 is the greatest ODI innings ever.",
+    "lookingForText": "Need a consistent workout partner who won't skip leg day and is down for late evening tea runs.",
+    "unpopularOpinion": "Cardio is actually fun if you do it outdoors instead of sitting on a stationary bike.",
+    "favorites": "Creatine monohydrate, protein shakes, and street-style shawarma."
+  },
+  {
+    "email": "seed11@iiitr.ac.in",
+    "year": 3,
+    "branch": "Computer Science and Engineering",
+    "sliders": [
+      3,
+      2,
+      4,
+      3,
+      5,
+      4
+    ],
+    "tags": [
+      "football",
+      "gym",
+      "coding",
+      "web dev",
+      "hackathons"
+    ],
+    "lookingFor": [
+      "project/hackathon teammate",
+      "gym buddy",
+      "gaming squad"
+    ],
+    "availability": [
+      "evenings",
+      "late night"
+    ],
+    "weekend": "Playing 7v7 turf football under the floodlights, then grinding React code until 2 AM.",
+    "talkAbout": "How football tactics like Gegenpressing translate into high-pressure hackathon strategies.",
+    "lookingForText": "Looking for a full-stack dev who also loves playing football on weekends.",
+    "unpopularOpinion": "Vite is infinitely superior to Create React App and it's not even close.",
+    "favorites": "Real Madrid, FIFA 23, and Tailwind CSS."
+  },
+  {
+    "email": "seed12@iiitr.ac.in",
+    "year": 1,
+    "branch": "Electronics and Communication Engineerin",
+    "sliders": [
+      5,
+      4,
+      2,
+      5,
+      4,
+      2
+    ],
+    "tags": [
+      "badminton",
+      "running",
+      "yoga",
+      "memes",
+      "travel"
+    ],
+    "lookingFor": [
+      "hangout friends",
+      "gym buddy"
+    ],
+    "availability": [
+      "mornings",
+      "weekends"
+    ],
+    "weekend": "Playing back-to-back badminton matches at the SAC and exploring local street food joints.",
+    "talkAbout": "Best badminton racquets, tension strings, and the best momo spots near campus.",
+    "lookingForText": "Someone to play intermediate-level badminton with every morning before 8 AM classes.",
+    "unpopularOpinion": "Morning classes are fine if you actually sleep before midnight.",
+    "favorites": "Yonex Voltric series and cold coffee."
+  },
+  {
+    "email": "seed13@iiitr.ac.in",
+    "year": 4,
+    "branch": "Information Technology",
+    "sliders": [
+      2,
+      1,
+      5,
+      2,
+      4,
+      5
+    ],
+    "tags": [
+      "gym",
+      "cricket",
+      "PC gaming",
+      "memes",
+      "movies"
+    ],
+    "lookingFor": [
+      "gaming squad",
+      "deep talks"
+    ],
+    "availability": [
+      "late night",
+      "weekends"
+    ],
+    "weekend": "Late night bench press sessions followed by 3 AM Valorant ranked matches with the boys.",
+    "talkAbout": "Powerlifting goals, gaming setups, and surviving placement season stress.",
+    "lookingForText": "Down to meet night owls who hit the gym late and like talking about life while gaming.",
+    "unpopularOpinion": "Hit-the-gym advice solves 90% of college existential crises.",
+    "favorites": "Pre-workout, Valorant, and Christopher Nolan soundtracks."
+  },
+  {
+    "email": "seed14@iiitr.ac.in",
+    "year": 2,
+    "branch": "Data Science and Artificial Intelligence",
+    "sliders": [
+      3,
+      4,
+      4,
+      5,
+      3,
+      3
+    ],
+    "tags": [
+      "running",
+      "volunteering",
+      "spirituality",
+      "reading",
+      "yoga"
+    ],
+    "lookingFor": [
+      "study buddy",
+      "deep talks"
+    ],
+    "availability": [
+      "mornings",
+      "afternoons"
+    ],
+    "weekend": "5km morning trail run, followed by reading philosophy books in the library garden.",
+    "talkAbout": "Marathon training, stoicism, and how physical discipline sharpens mental focus.",
+    "lookingForText": "Looking for someone to train for a 10k marathon with and share good book recommendations.",
+    "unpopularOpinion": "Waking up at 5 AM is easier than staying up past 1 AM.",
+    "favorites": "Haruki Murakami novels, black coffee, and Nike Pegasus shoes."
+  },
+  {
+    "email": "seed15@iiitr.ac.in",
+    "year": 3,
+    "branch": "Computer Science and Engineering",
+    "sliders": [
+      4,
+      5,
+      3,
+      4,
+      5,
+      4
+    ],
+    "tags": [
+      "chess",
+      "gym",
+      "AI/ML",
+      "competitive programming",
+      "PC gaming"
+    ],
+    "lookingFor": [
+      "study buddy",
+      "project/hackathon teammate"
+    ],
+    "availability": [
+      "evenings",
+      "late night"
+    ],
+    "weekend": "Calisthenics workout at the park, solving LeetCode hard problems, and rapid chess tournaments.",
+    "talkAbout": "Chess openings, muscle building without equipment, and neural network architectures.",
+    "lookingForText": "Searching for a buddy who likes chess, bodyweight fitness, and building ML side projects.",
+    "unpopularOpinion": "Calisthenics builds better functional strength than traditional heavy weightlifting.",
+    "favorites": "Magnus Carlsen games, pull-up bars, and PyTorch docs."
+  },
+  {
+    "email": "seed16@iiitr.ac.in",
+    "year": 1,
+    "branch": "Smart Manufacturing",
+    "sliders": [
+      5,
+      4,
+      3,
+      5,
+      4,
+      3
+    ],
+    "tags": [
+      "football",
+      "dance",
+      "content creation",
+      "gym",
+      "food & cafés"
+    ],
+    "lookingFor": [
+      "hangout friends",
+      "gym buddy"
+    ],
+    "availability": [
+      "afternoons",
+      "evenings"
+    ],
+    "weekend": "Freestyle football tricks practice, filming gym reels, and trying out new shakes at the canteen.",
+    "talkAbout": "Calorie counting, athletic mobility drills, and video editing techniques.",
+    "lookingForText": "Anyone down for evening gym sessions and shooting quick workout edits afterwards?",
+    "unpopularOpinion": "If you don't track your macros, you're just guessing in the gym.",
+    "favorites": "Ronaldinho highlights, CapCut templates, and peanut butter oats."
+  },
+  {
+    "email": "seed20@iiitr.ac.in",
+    "year": 3,
+    "branch": "Computer Science",
+    "sliders": [
+      2,
+      4,
+      5,
+      4,
+      5,
+      5
+    ],
+    "tags": [
+      "competitive programming",
+      "coding",
+      "chess",
+      "PC gaming",
+      "anime"
+    ],
+    "lookingFor": [
+      "project/hackathon teammate",
+      "gaming squad",
+      "deep talks"
+    ],
+    "availability": [
+      "late night",
+      "weekends"
+    ],
+    "weekend": "Grinding Codeforces contests at 8 PM and then playing Valorant till sunrise.",
+    "talkAbout": "Segment trees, graph algorithms, and why Attack on Titan is a masterpiece.",
+    "lookingForText": "Someone who won't give up at 3 AM during a 36-hour hackathon.",
+    "unpopularOpinion": "C++ is superior to Python even for quick script building.",
+    "favorites": "Codeforces, Valorant, Steins;Gate"
+  },
+  {
+    "email": "seed21@iiitr.ac.in",
+    "year": 2,
+    "branch": "Information Technology",
+    "sliders": [
+      3,
+      5,
+      3,
+      5,
+      5,
+      4
+    ],
+    "tags": [
+      "hackathons",
+      "coding",
+      "web dev",
+      "open source",
+      "food & cafés"
+    ],
+    "lookingFor": [
+      "project/hackathon teammate",
+      "hangout friends"
+    ],
+    "availability": [
+      "afternoons",
+      "evenings",
+      "late night"
+    ],
+    "weekend": "Building web apps for hackathons and exploring dark roast coffee spots near campus.",
+    "talkAbout": "Full-stack frameworks, hackathon ideas, and the best street food joints around IIIT.",
+    "lookingForText": "Looking for a cracked UI/UX designer or backend dev to win upcoming national hackathons.",
+    "unpopularOpinion": "Hackathons are 80% presentation pitch and 20% actual working code.",
+    "favorites": "Next.js, Cold Brew, Hackathons"
+  },
+  {
+    "email": "seed22@iiitr.ac.in",
+    "year": 1,
+    "branch": "Computer Science",
+    "sliders": [
+      1,
+      2,
+      4,
+      3,
+      5,
+      5
+    ],
+    "tags": [
+      "competitive programming",
+      "coding",
+      "reading",
+      "anime",
+      "memes"
+    ],
+    "lookingFor": [
+      "study buddy",
+      "deep talks"
+    ],
+    "availability": [
+      "late night",
+      "weekends"
+    ],
+    "weekend": "Solving LeetCode hard problems in silence and reading sci-fi web novels.",
+    "talkAbout": "Time complexity optimizations and obscure web serials.",
+    "lookingForText": "A quiet CP partner to upsolve contest problems together on late-night Discord calls.",
+    "unpopularOpinion": "Dynamic Programming is actually fun once it clicks.",
+    "favorites": "LeetCode, Three-Body Problem, Dark Mode"
+  },
+  {
+    "email": "seed23@iiitr.ac.in",
+    "year": 4,
+    "branch": "Data Science",
+    "sliders": [
+      4,
+      3,
+      4,
+      4,
+      5,
+      4
+    ],
+    "tags": [
+      "hackathons",
+      "AI/ML",
+      "open source",
+      "gym",
+      "running"
+    ],
+    "lookingFor": [
+      "project/hackathon teammate",
+      "gym buddy"
+    ],
+    "availability": [
+      "mornings",
+      "evenings"
+    ],
+    "weekend": "Hit an early morning leg day, then fine-tune LLM models for a side project.",
+    "talkAbout": "Neural network architectures, high-protein recipes, and progressive overload.",
+    "lookingForText": "Need someone to grind ML research papers with and spot me on heavy bench press days.",
+    "unpopularOpinion": "Early morning workouts beat late-night coding sessions every single time.",
+    "favorites": "PyTorch, Whey Isolate, Git"
+  },
+  {
+    "email": "seed24@iiitr.ac.in",
+    "year": 2,
+    "branch": "Electronics & Communication",
+    "sliders": [
+      2,
+      3,
+      5,
+      3,
+      5,
+      5
+    ],
+    "tags": [
+      "competitive programming",
+      "coding",
+      "playing music",
+      "singing",
+      "PC gaming"
+    ],
+    "lookingFor": [
+      "study buddy",
+      "hangout friends"
+    ],
+    "availability": [
+      "evenings",
+      "late night"
+    ],
+    "weekend": "Jamming on the acoustic guitar after grueling 3-hour rating contests.",
+    "talkAbout": "System design, fingerpicking techniques, and indie rock bands.",
+    "lookingForText": "Looking for fellow coders who like to destress with acoustic music jams in the hostel balcony.",
+    "unpopularOpinion": "Math for CP is basically just puzzle solving with a computer.",
+    "favorites": "CodeChef, Taylor Guitars, Anuv Jain"
+  },
+  {
+    "email": "seed25@iiitr.ac.in",
+    "year": 3,
+    "branch": "Computer Science",
+    "sliders": [
+      3,
+      4,
+      3,
+      5,
+      4,
+      5
+    ],
+    "tags": [
+      "hackathons",
+      "web dev",
+      "startups",
+      "investing",
+      "travel"
+    ],
+    "lookingFor": [
+      "project/hackathon teammate",
+      "hangout friends"
+    ],
+    "availability": [
+      "evenings",
+      "weekends"
+    ],
+    "weekend": "Pitching MVP prototypes at startup incubators or planning weekend road trips.",
+    "talkAbout": "SaaS ideas, venture capital, tech trends, and budget travel hacks.",
+    "lookingForText": "Looking for ambitious co-builders who want to turn hackathon projects into actual startups.",
+    "unpopularOpinion": "Most tech startups don't need AI, they just need a clean CRUD app.",
+    "favorites": "Y Combinator podcasts, Figma, Hill stations"
+  },
+  {
+    "email": "seed26@iiitr.ac.in",
+    "year": 1,
+    "branch": "Cyber Security",
+    "sliders": [
+      2,
+      2,
+      4,
+      2,
+      5,
+      5
+    ],
+    "tags": [
+      "coding",
+      "competitive programming",
+      "cybersecurity",
+      "chess",
+      "web series"
+    ],
+    "lookingFor": [
+      "study buddy",
+      "gaming squad"
+    ],
+    "availability": [
+      "late night"
+    ],
+    "weekend": "Playing Capture The Flag (CTF) security competitions and analyzing chess games.",
+    "talkAbout": "Linux kernel exploits, chess tactics, and Mr. Robot episodes.",
+    "lookingForText": "Seeking a late-night study partner to practice algorithms and learn ethical hacking.",
+    "unpopularOpinion": "Security should be taught before teaching how to write a single line of code.",
+    "favorites": "Kali Linux, Lichess, Cyberpunk"
+  },
+  {
+    "email": "seed30@iiitr.ac.in",
+    "year": 2,
+    "sliders": [
+      3,
+      4,
+      4,
+      5,
+      2,
+      5
+    ],
+    "tags": [
+      "playing music",
+      "singing",
+      "content creation",
+      "movies",
+      "food & cafés"
+    ],
+    "lookingFor": [
+      "hangout friends",
+      "deep talks"
+    ],
+    "availability": [
+      "evenings",
+      "late night"
+    ],
+    "weekend": "Jamming with my acoustic guitar on the hostel terrace or hunting for good cold coffee spots nearby.",
+    "talkAbout": "Indie music production, why 90s Bollywood soundtracks hit different, and sound engineering.",
+    "lookingForText": "Someone who wants to vibe to good music, share playlists, or explore local cafes over the weekend."
+  },
+  {
+    "email": "seed31@iiitr.ac.in",
+    "year": 1,
+    "sliders": [
+      2,
+      2,
+      5,
+      4,
+      1,
+      4
+    ],
+    "tags": [
+      "drawing",
+      "anime",
+      "web dev",
+      "coding",
+      "web series"
+    ],
+    "lookingFor": [
+      "study buddy",
+      "project/hackathon teammate",
+      "deep talks"
+    ],
+    "availability": [
+      "afternoons",
+      "late night",
+      "weekends"
+    ],
+    "weekend": "Sketching digital art on my tablet while rewatching old anime episodes.",
+    "talkAbout": "UI/UX design principles, animation styles, and how storytelling in games works.",
+    "lookingForText": "Looking for a creative tech buddy to work on frontend projects or just doodle together."
+  },
+  {
+    "email": "seed32@iiitr.ac.in",
+    "year": 3,
+    "sliders": [
+      4,
+      5,
+      3,
+      4,
+      3,
+      4
+    ],
+    "tags": [
+      "photography",
+      "travel",
+      "writing",
+      "food & cafés",
+      "memes"
+    ],
+    "lookingFor": [
+      "hangout friends",
+      "gaming squad"
+    ],
+    "availability": [
+      "evenings",
+      "weekends"
+    ],
+    "weekend": "Walking around the city capturing street photography and trying street food.",
+    "talkAbout": "Framing techniques, short story plots, and the weirdest places we have ever traveled to.",
+    "lookingForText": "A friend to go on photowalks with or grab a quick bite when lab work gets overwhelming."
+  },
+  {
+    "email": "seed33@iiitr.ac.in",
+    "year": 4,
+    "sliders": [
+      1,
+      2,
+      5,
+      3,
+      1,
+      5
+    ],
+    "tags": [
+      "dance",
+      "singing",
+      "K-drama",
+      "yoga",
+      "spirituality"
+    ],
+    "lookingFor": [
+      "deep talks",
+      "hangout friends"
+    ],
+    "availability": [
+      "mornings",
+      "late night"
+    ],
+    "weekend": "Practicing choreography in the dance room or catching up on sleep and K-dramas.",
+    "talkAbout": "Classical vs contemporary dance forms, mindfulness, and deep life philosophical questions.",
+    "lookingForText": "Anyone who appreciates performing arts or just wants to have unfiltered late-night conversations."
+  },
+  {
+    "email": "seed34@iiitr.ac.in",
+    "year": 2,
+    "sliders": [
+      5,
+      4,
+      2,
+      5,
+      4,
+      4
+    ],
+    "tags": [
+      "playing music",
+      "PC gaming",
+      "football",
+      "cybersecurity",
+      "memes"
+    ],
+    "lookingFor": [
+      "gaming squad",
+      "hangout friends"
+    ],
+    "availability": [
+      "evenings",
+      "late night",
+      "weekends"
+    ],
+    "weekend": "Playing bass guitar for an hour, followed by late-night Valorant grinds with the squad.",
+    "talkAbout": "Rock music history, gaming setups, and tactical plays in football.",
+    "lookingForText": "Need a fellow gamer who also loves heavy metal or rock music to hang out with."
+  },
+  {
+    "email": "seed35@iiitr.ac.in",
+    "year": 3,
+    "sliders": [
+      2,
+      3,
+      4,
+      3,
+      2,
+      3
+    ],
+    "tags": [
+      "writing",
+      "reading",
+      "movies",
+      "spirituality",
+      "volunteering"
+    ],
+    "lookingFor": [
+      "deep talks",
+      "study buddy"
+    ],
+    "availability": [
+      "afternoons",
+      "evenings"
+    ],
+    "weekend": "Writing poetry in my notebook near the library lawn or reading classic literature.",
+    "talkAbout": "Character development in novels, cinema analysis, and philosophical essays.",
+    "lookingForText": "Searching for someone to exchange book recommendations with and discuss deep movie themes."
+  },
+  {
+    "email": "seed36@iiitr.ac.in",
+    "year": 1,
+    "sliders": [
+      3,
+      4,
+      3,
+      4,
+      2,
+      5
+    ],
+    "tags": [
+      "singing",
+      "playing music",
+      "badminton",
+      "anime",
+      "K-drama"
+    ],
+    "lookingFor": [
+      "hangout friends",
+      "gym buddy"
+    ],
+    "availability": [
+      "evenings",
+      "late night"
+    ],
+    "weekend": "Trying out new vocal harmonies on keyboard and playing a casual game of badminton in the evening.",
+    "talkAbout": "Western classical music, anime soundtracks, and learning new instruments from scratch.",
+    "lookingForText": "Looking for casual friends to jam, play court sports, or chill in the mess hall after classes."
+  },
+  {
+    "email": "seed40@iiitr.ac.in",
+    "year": 2,
+    "branch": "Computer Science",
+    "sliders": [
+      1,
+      2,
+      5,
+      2,
+      1,
+      4
+    ],
+    "tags": [
+      "reading",
+      "writing",
+      "spirituality",
+      "chess",
+      "movies"
+    ],
+    "lookingFor": [
+      "deep talks",
+      "hangout friends"
+    ],
+    "availability": [
+      "evenings",
+      "late night"
+    ],
+    "weekend": "Curled up in my hostel corner reading Dostoyevsky or writing bad poetry while sipping instant coffee.",
+    "talkAbout": "Existentialism, late 19th-century literature, and whether consciousness is just an illusion.",
+    "lookingForText": "Someone who enjoys slow tea breaks and quiet, late-night conversations about life and books.",
+    "unpopularOpinion": "Kindles can never replace the smell and feel of actual paper books.",
+    "favorites": "Murakami, Crime and Punishment, Interstellar soundtrack"
+  },
+  {
+    "email": "seed41@iiitr.ac.in",
+    "year": 3,
+    "branch": "Data Science",
+    "sliders": [
+      2,
+      1,
+      5,
+      3,
+      2,
+      5
+    ],
+    "tags": [
+      "reading",
+      "coding",
+      "AI/ML",
+      "open source",
+      "writing",
+      "spirituality"
+    ],
+    "lookingFor": [
+      "deep talks",
+      "study buddy",
+      "project/hackathon teammate"
+    ],
+    "availability": [
+      "late night",
+      "weekends"
+    ],
+    "weekend": "Reading philosophy papers and tweaking my NLP side project until 3 AM.",
+    "talkAbout": "The ethics of artificial general intelligence and old philosophical paradoxes.",
+    "lookingForText": "A fellow quiet nerd who wants to alternate between deep reading sessions and coding projects.",
+    "unpopularOpinion": "Writing clear documentation is more artistic than writing the actual code.",
+    "favorites": "Gödel, Escher, Bach; Bertrand Russell essays"
+  },
+  {
+    "email": "seed42@iiitr.ac.in",
+    "year": 1,
+    "branch": "Electronics and Communication",
+    "sliders": [
+      1,
+      3,
+      4,
+      3,
+      1,
+      2
+    ],
+    "tags": [
+      "reading",
+      "playing music",
+      "singing",
+      "food & cafés",
+      "writing"
+    ],
+    "lookingFor": [
+      "deep talks",
+      "hangout friends"
+    ],
+    "availability": [
+      "mornings",
+      "evenings"
+    ],
+    "weekend": "Hunting for quiet cafés off-campus with an acoustic guitar and an old paperback.",
+    "talkAbout": "How music composition relates to storytelling, and our favorite book quotes.",
+    "lookingForText": "Looking for someone to chill at a quiet spot, share book recommendations, and jam softly.",
+    "unpopularOpinion": "Popular pop lyrics lack the emotional depth of classic literature.",
+    "favorites": "Norwegian Wood, Rabindranath Tagore poems, acoustic indie folk"
+  },
+  {
+    "email": "seed43@iiitr.ac.in",
+    "year": 4,
+    "branch": "Information Technology",
+    "sliders": [
+      2,
+      2,
+      5,
+      2,
+      2,
+      5
+    ],
+    "tags": [
+      "reading",
+      "anime",
+      "web series",
+      "movies",
+      "spirituality"
+    ],
+    "lookingFor": [
+      "deep talks",
+      "study buddy"
+    ],
+    "availability": [
+      "late night",
+      "weekends"
+    ],
+    "weekend": "Watching character study films or re-reading classic sci-fi novels in absolute peace.",
+    "talkAbout": "Psychological themes in psychological thrillers, storytelling tropes, and human nature.",
+    "lookingForText": "Someone down for midnight strolls on the quiet campus roads discussing deep questions.",
+    "unpopularOpinion": "Binge-watching shows is exhausting compared to getting lost in a good book.",
+    "favorites": "Dune, Monster anime, Severance, Ted Chiang short stories"
+  },
+  {
+    "email": "seed44@iiitr.ac.in",
+    "year": 2,
+    "branch": "Computer Science",
+    "sliders": [
+      1,
+      1,
+      5,
+      1,
+      1,
+      3
+    ],
+    "tags": [
+      "reading",
+      "writing",
+      "chess",
+      "spirituality"
+    ],
+    "lookingFor": [
+      "deep talks",
+      "study buddy"
+    ],
+    "availability": [
+      "afternoons",
+      "evenings"
+    ],
+    "weekend": "Organizing my bookshelf by genre and spending hours annotated historical non-fiction.",
+    "talkAbout": "Ancient world history, how empires fall, and personal growth philosophies.",
+    "lookingForText": "A low-energy friend for quiet study sessions and thoughtful 1-on-1 conversations.",
+    "unpopularOpinion": "Social media has ruined our collective attention span for long-form reading.",
+    "favorites": "Sapiens, Marcus Aurelius' Meditations, classical chess games"
+  },
+  {
+    "email": "seed45@iiitr.ac.in",
+    "year": 3,
+    "branch": "Smart Manufacturing",
+    "sliders": [
+      2,
+      4,
+      4,
+      4,
+      1,
+      4
+    ],
+    "tags": [
+      "reading",
+      "photography",
+      "travel",
+      "content creation",
+      "food & cafés"
+    ],
+    "lookingFor": [
+      "deep talks",
+      "hangout friends"
+    ],
+    "availability": [
+      "evenings",
+      "weekends"
+    ],
+    "weekend": "Walking around the city taking street photos, stopping by old bookstalls, and journaling.",
+    "talkAbout": "Visual storytelling, human psychology, and nostalgia in urban environments.",
+    "lookingForText": "A friend to explore hidden city corners with and talk about life beyond engineering.",
+    "unpopularOpinion": "The best travel experiences come from sitting still in a foreign place and watching people.",
+    "favorites": "Humans of New York, On the Road by Kerouac, vintage film aesthetic"
+  },
+  {
+    "email": "seed46@iiitr.ac.in",
+    "year": 1,
+    "branch": "Computational Linguistics",
+    "sliders": [
+      1,
+      2,
+      5,
+      2,
+      2,
+      4
+    ],
+    "tags": [
+      "reading",
+      "writing",
+      "spirituality",
+      "web dev",
+      "chess"
+    ],
+    "lookingFor": [
+      "deep talks",
+      "study buddy"
+    ],
+    "availability": [
+      "evenings",
+      "late night"
+    ],
+    "weekend": "Drafting speculative fiction stories while listening to ambient rain sounds.",
+    "talkAbout": "World-building, ethics, and why we feel lonely even when surrounded by people.",
+    "lookingForText": "Seeking a genuine connection with someone who isn't afraid of vulnerable, raw discussions.",
+    "unpopularOpinion": "Small talk is way more exhausting than having a 2-hour debate on life purpose.",
+    "favorites": "The Master and Margarita, Ursula K. Le Guin, slow synth music"
+  },
+  {
+    "email": "seed50@iiitr.ac.in",
+    "year": 2,
+    "branch": "Computer Science and Engineering",
+    "sliders": [
+      5,
+      5,
+      2,
+      5,
+      1,
+      4
+    ],
+    "tags": [
+      "food & cafés",
+      "travel",
+      "memes",
+      "movies",
+      "K-drama"
+    ],
+    "lookingFor": [
+      "hangout friends",
+      "gaming squad"
+    ],
+    "availability": [
+      "evenings",
+      "weekends"
+    ],
+    "weekend": "Exploring local street food joints or dragging people on spontaneous late-night chai runs.",
+    "talkAbout": "The absolute best momo spot near campus and why road trips solve everything.",
+    "lookingForText": "Someone who down to try new eateries without overthinking the budget.",
+    "unpopularOpinion": "Café ambience matters way more than the actual coffee.",
+    "favorites": "Street food crawls, travel vlogs, indie pop"
+  },
+  {
+    "email": "seed51@iiitr.ac.in",
+    "year": 3,
+    "branch": "Electronics and Communication Engineerin",
+    "sliders": [
+      4,
+      4,
+      3,
+      4,
+      2,
+      5
+    ],
+    "tags": [
+      "food & cafés",
+      "travel",
+      "photography",
+      "content creation",
+      "web series"
+    ],
+    "lookingFor": [
+      "hangout friends",
+      "deep talks"
+    ],
+    "availability": [
+      "afternoons",
+      "evenings",
+      "weekends"
+    ],
+    "weekend": "Hopping between rooftop cafés and taking aesthetic photos of food and city sunsets.",
+    "talkAbout": "Hidden gems in the city, food photography angles, and upcoming weekend getaways.",
+    "lookingForText": "A buddy to explore aesthetic spots with and take turns being each other's photographer.",
+    "unpopularOpinion": "Fancy fine dining is completely overrated compared to local night markets.",
+    "favorites": "Cold coffee, sunset viewpoints, retro camera filters"
+  },
+  {
+    "email": "seed52@iiitr.ac.in",
+    "year": 1,
+    "branch": "Information Technology",
+    "sliders": [
+      5,
+      4,
+      2,
+      5,
+      3,
+      4
+    ],
+    "tags": [
+      "food & cafés",
+      "travel",
+      "dance",
+      "K-drama",
+      "singing"
+    ],
+    "lookingFor": [
+      "hangout friends",
+      "gym buddy"
+    ],
+    "availability": [
+      "evenings",
+      "late night"
+    ],
+    "weekend": "Organizing group dinners at new restaurants and convincing everyone to hit the dance floor later.",
+    "talkAbout": "Regional cuisines, fun dance routines, and planning group trips to the hills.",
+    "lookingForText": "Extroverted vibes only! Need people who won't say no to random 11 PM dessert cravings.",
+    "unpopularOpinion": "Pineapple on pizza actually slaps if done right.",
+    "favorites": "Butter chicken, dance reels, long train journeys"
+  },
+  {
+    "email": "seed53@iiitr.ac.in",
+    "year": 4,
+    "branch": "Computer Science and Engineering",
+    "sliders": [
+      4,
+      5,
+      4,
+      5,
+      2,
+      5
+    ],
+    "tags": [
+      "food & cafés",
+      "travel",
+      "coding",
+      "web dev",
+      "hackathons",
+      "startups"
+    ],
+    "lookingFor": [
+      "project/hackathon teammate",
+      "hangout friends"
+    ],
+    "availability": [
+      "evenings",
+      "late night",
+      "weekends"
+    ],
+    "weekend": "Grabbing heavy brunch before grinding out a hackathon project at a 24/7 diner.",
+    "talkAbout": "Combining tech with food tech ideas, best remote work cafés, and backpacking stories.",
+    "lookingForText": "Someone to code with during the day and explore night food trucks with afterwards.",
+    "unpopularOpinion": "The best brainstorming happens over street food, not in formal meeting rooms.",
+    "favorites": "Espresso shots, hackathon free swag, street-side shawarma"
+  },
+  {
+    "email": "seed54@iiitr.ac.in",
+    "year": 2,
+    "branch": "Data Science and Artificial Intelligence",
+    "sliders": [
+      4,
+      4,
+      3,
+      5,
+      2,
+      4
+    ],
+    "tags": [
+      "food & cafés",
+      "travel",
+      "playing music",
+      "singing",
+      "movies",
+      "reading"
+    ],
+    "lookingFor": [
+      "hangout friends",
+      "deep talks"
+    ],
+    "availability": [
+      "afternoons",
+      "evenings"
+    ],
+    "weekend": "Jamming with acoustic guitars at open-air parks followed by trying out vintage bakeries.",
+    "talkAbout": "Live music venues, indie food joints, and travel playlists for endless highway drives.",
+    "lookingForText": "Looking for fellow musical souls who love food crawls and spontaneous outdoor jams.",
+    "unpopularOpinion": "A cafe without live acoustic music is just an overpriced dining hall.",
+    "favorites": "Acoustic covers, garlic bread, mountain treks"
+  },
+  {
+    "email": "seed55@iiitr.ac.in",
+    "year": 3,
+    "branch": "Smart Manufacturing",
+    "sliders": [
+      5,
+      5,
+      2,
+      4,
+      3,
+      5
+    ],
+    "tags": [
+      "food & cafés",
+      "travel",
+      "cricket",
+      "badminton",
+      "memes"
+    ],
+    "lookingFor": [
+      "hangout friends",
+      "gaming squad"
+    ],
+    "availability": [
+      "evenings",
+      "weekends"
+    ],
+    "weekend": "Catching screening of match days at sports cafes or taking quick weekend bike trips out of the city.",
+    "talkAbout": "IPL tactics, highway dhabas, and the ultimate biryani spots in every major city.",
+    "lookingForText": "People down to grab late-night biryani and talk about sports for hours.",
+    "unpopularOpinion": "Dhaba food on national highways beats 5-star restaurant food every single time.",
+    "favorites": "Hyderabadi biryani, highway rides, match day screenings"
+  },
+  {
+    "email": "seed56@iiitr.ac.in",
+    "year": 1,
+    "branch": "Computer Science and Engineering",
+    "sliders": [
+      4,
+      4,
+      3,
+      4,
+      1,
+      3
+    ],
+    "tags": [
+      "food & cafés",
+      "travel",
+      "volunteering",
+      "writing",
+      "photography"
+    ],
+    "lookingFor": [
+      "hangout friends",
+      "study buddy"
+    ],
+    "availability": [
+      "mornings",
+      "weekends"
+    ],
+    "weekend": "Visiting local heritage sites, trying traditional breakfasts, and documenting food histories.",
+    "talkAbout": "Cultural food tours, travel memoirs, and discovering hidden city alleys.",
+    "lookingForText": "Looking for curious minds who want to explore culture, heritage food, and city secrets.",
+    "unpopularOpinion": "Traditional breakfast dishes are infinitely superior to continental breakfast spreads.",
+    "favorites": "Filter coffee, heritage walks, travel journals"
+  },
+  {
+    "email": "demo1@iiitr.ac.in",
+    "year": 2,
+    "sliders": [
+      2,
+      4,
+      5,
+      4,
+      2,
+      5
+    ],
+    "tags": [
+      "anime",
+      "PC gaming",
+      "hackathons",
+      "memes",
+      "food & cafés"
+    ],
+    "lookingFor": [
+      "gaming squad",
+      "project/hackathon teammate"
+    ],
+    "availability": [
+      "late night",
+      "weekends"
+    ],
+    "weekend": "Valorant till 3am, then a late breakfast and anime marathon",
+    "talkAbout": "One Piece theories and building side projects nobody asked for",
+    "lookingForText": "Someone to queue ranked with and maybe build a hackathon project",
+    "favorites": "Jujutsu Kaisen, Valorant, lo-fi playlists"
+  },
+  {
+    "email": "demo2@iiitr.ac.in",
+    "year": 2,
+    "sliders": [
+      2,
+      4,
+      5,
+      4,
+      2,
+      5
+    ],
+    "tags": [
+      "anime",
+      "PC gaming",
+      "hackathons",
+      "memes",
+      "food & cafés"
+    ],
+    "lookingFor": [
+      "gaming squad",
+      "project/hackathon teammate"
+    ],
+    "availability": [
+      "late night",
+      "weekends"
+    ],
+    "weekend": "Gaming all night with friends, then sleeping till noon and watching anime",
+    "talkAbout": "One Piece theories and building side projects nobody asked for",
+    "lookingForText": "Someone to queue ranked with and maybe build a hackathon project",
+    "favorites": "Jujutsu Kaisen, Valorant, lo-fi playlists"
+  }
+]

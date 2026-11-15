@@ -103,11 +103,14 @@ export default function OnboardingPage() {
         body: JSON.stringify(profile),
       });
       if (response.status === 401) return router.replace("/login");
-      if (!response.ok) throw new Error();
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(typeof data?.error === "string" ? data.error : "");
+      }
       router.replace("/matches");
-    } catch {
-      // Form state is kept, so the user can just press the button again.
-      setError("Couldn't save, try again.");
+    } catch (failure) {
+      // Form state is kept, so the user can fix the field or just press the button again.
+      setError(failure instanceof Error && failure.message ? failure.message : "Couldn't save, try again.");
       setBusy(false);
     }
   }

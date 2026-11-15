@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@campus/db";
-import { generateIcebreakers } from "@campus/core";
+import { demoBuddyConnectBack, generateIcebreakers } from "@campus/core";
 import { requireUserId } from "@/lib/session";
 import { z } from "zod";
 
@@ -41,6 +41,7 @@ export async function POST(request: Request) {
       update: { action },
     });
     if (action === "SKIP") return NextResponse.json({ matched: false });
+    await demoBuddyConnectBack(userId, targetId); // no-op unless DEMO_MODE="true" and target is the demo buddy
 
     const reverse = await prisma.like.findUnique({
       where: { fromUserId_toUserId: { fromUserId: targetId, toUserId: userId } },

@@ -1,5 +1,6 @@
 import { prisma, semanticCandidates } from "@campus/db";
 import { FACET_WEIGHTS } from "./constants";
+import { getDemoBuddyId } from "./demo";
 
 const FACET_REASON: Record<string, string> = {
   PERSONALITY: "similar personalities",
@@ -8,10 +9,10 @@ const FACET_REASON: Record<string, string> = {
   INTENT: "want the same kind of friendship",
 };
 
-// Gemini similarities sit in a narrow, high band (roughly 0.55–0.9). Calibrate LOW/HIGH from
-// the `raw` values logged with MATCH_DEBUG=1 so the UI shows a friendly 55–98% spread.
-const LOW = Number(process.env.MATCH_LOW ?? 0.55);
-const HIGH = Number(process.env.MATCH_HIGH ?? 0.85);
+// Gemini similarities sit in a narrow, high band. Calibrated on the seed set (CP6): top matches raw ≈ 0.85–1.0,
+// weak ones ≈ 0.70–0.75. Re-tune from the `raw` values logged with MATCH_DEBUG=1.
+const LOW = Number(process.env.MATCH_LOW ?? 0.68);
+const HIGH = Number(process.env.MATCH_HIGH ?? 0.88);
 const toPercent = (raw: number) =>
   Math.round(Math.min(98, Math.max(55, 55 + ((raw - LOW) / (HIGH - LOW)) * 43)));
 
@@ -43,6 +44,44 @@ const publicSelect = {
   year: true,
   profile: { select: { tags: true, lookingFor: true, vibe: true } },
 } as const;
+
+/** Demo mode: put the demo buddy first in the feed (unless already connected/skipped/blocked). */
+async function pinDemoBuddy(userId: string, myTags: string[], scored: Recommendation[]) {
+  const buddyId = await getDemoBuddyId();
+  if (!buddyId || buddyId === userId) return;
+
+  const index = scored.findIndex((item) => item.userId === buddyId);
+  if (index >= 0) {
+    scored.unshift(...scored.splice(index, 1));
+    return;
+  }
+  // Not among the semantic candidates: add it, unless the user already acted on it or a block exists.
+  const [liked, blocked] = await Promise.all([
+    prisma.like.findUnique({ where: { fromUserId_toUserId: { fromUserId: userId, toUserId: buddyId } }, select: { id: true } }),
+    prisma.block.findFirst({
+      where: { OR: [{ blockerId: userId, blockedId: buddyId }, { blockerId: buddyId, blockedId: userId }] },
+      select: { id: true },
+    }),
+  ]);
+  if (liked || blocked) return;
+  const buddy = await prisma.user.findUnique({ where: { id: buddyId }, select: publicSelect });
+  if (!buddy?.profile) return;
+  const sharedTags = buddy.profile.tags.filter((tag) => myTags.includes(tag));
+  scored.unshift({
+    userId: buddy.id,
+    alias: buddy.alias,
+    avatarEmoji: buddy.avatarEmoji,
+    year: buddy.year,
+    vibe: buddy.profile.vibe,
+    tags: buddy.profile.tags,
+    score: 90,
+    raw: 1,
+    reasons: [
+      sharedTags.length ? `You both like ${sharedTags.slice(0, 3).join(", ")}` : "Always up for a chat 👋",
+    ],
+    icebreaker: "Say hi and ask about their perfect weekend 🌤️",
+  });
+}
 
 export async function getRecommendations(userId: string, take = 10): Promise<Recommendation[]> {
   const me = await prisma.profile.findUnique({ where: { userId } });
@@ -90,6 +129,7 @@ export async function getRecommendations(userId: string, take = 10): Promise<Rec
   });
 
   scored.sort((a, b) => b.raw - a.raw);
+  await pinDemoBuddy(userId, me.tags, scored);
   const results = scored.slice(0, take);
 
   // Cold-start fallback: top up with random onboarded users who aren't excluded.

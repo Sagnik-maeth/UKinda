@@ -8,3 +8,4 @@ export * from "./embed";
 export * from "./ai";
 export * from "./profile";
 export * from "./matching";
+export * from "./demo";
