@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { SESSION_COOKIE, verifySession } from "@campus/core";
+// Import the auth subpath only: the full @campus/core barrel pulls in Prisma + the embedding model.
+import { SESSION_COOKIE, verifySession } from "@campus/core/auth";
 
 export async function proxy(request: NextRequest) {
   const token = request.cookies.get(SESSION_COOKIE)?.value;
