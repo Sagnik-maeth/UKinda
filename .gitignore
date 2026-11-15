@@ -13,3 +13,4 @@ packages/db/prisma/*.db-journal
 packages/core/.cache/
 
 /generated/prisma
+packages/core/scripts/.generate-seed-progress.json

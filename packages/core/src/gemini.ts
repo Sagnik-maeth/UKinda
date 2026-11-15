@@ -36,13 +36,22 @@ function statusFrom(error: unknown): number | undefined {
   return Number.isFinite(status) ? status : undefined;
 }
 
+/** Dropped connections / timeouts (fetch throws a TypeError with a network `cause`). */
+function isNetworkError(error: unknown) {
+  if (!(error instanceof Error)) return false;
+  const code = (error.cause as { code?: string } | undefined)?.code ?? (error as { code?: string }).code;
+  return error.message === "fetch failed" ||
+    ["ECONNRESET", "ETIMEDOUT", "ECONNREFUSED", "EAI_AGAIN", "UND_ERR_SOCKET", "UND_ERR_CONNECT_TIMEOUT"].includes(code ?? "");
+}
+
 export async function withRetry<T>(operation: () => Promise<T>, tries = 4): Promise<T> {
   for (let attempt = 0; ; attempt += 1) {
     try {
       return await operation();
     } catch (error) {
       const status = statusFrom(error);
-      if (attempt + 1 >= tries || ![429, 500, 503].includes(status ?? 0)) {
+      const retryable = [429, 500, 503].includes(status ?? 0) || isNetworkError(error);
+      if (attempt + 1 >= tries || !retryable) {
         throw error;
       }
       const delay = 1000 * (2 ** attempt) + Math.random() * 300;
