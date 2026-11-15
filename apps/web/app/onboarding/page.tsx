@@ -1,11 +1,18 @@
 "use client";
 
-import { AVAILABILITY, LOOKING_FOR, SLIDERS, TAG_GROUPS, type ProfileInput } from "@campus/core";
+import { AVAILABILITY, LOOKING_FOR, SLIDERS, TAG_GROUPS } from "@campus/core/constants";
+import type { ProfileInput } from "@campus/core/schemas";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { Navigation } from "@/components/Navigation";
 
-const initialProfile: ProfileInput = {
+type ProfileForm = Omit<ProfileInput, "tags" | "lookingFor" | "availability"> & {
+  tags: string[];
+  lookingFor: string[];
+  availability: string[];
+};
+
+const initialProfile: ProfileForm = {
   year: 1,
   sliders: [3, 3, 3, 3, 3, 3],
   tags: [],
@@ -23,7 +30,7 @@ type Me = { alias: string; avatarEmoji: string; year: number | null };
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [profile, setProfile] = useState<ProfileInput>(initialProfile);
+  const [profile, setProfile] = useState<ProfileForm>(initialProfile);
   const [me, setMe] = useState<Me | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -38,7 +45,7 @@ export default function OnboardingPage() {
     }).catch(() => setError("Could not load your profile."));
   }, []);
 
-  function update<K extends keyof ProfileInput>(key: K, value: ProfileInput[K]) {
+  function update<K extends keyof ProfileForm>(key: K, value: ProfileForm[K]) {
     setProfile((current) => ({ ...current, [key]: value }));
   }
 

@@ -1,60 +1,33 @@
-type FeatureExtractor = (
-  texts: string[],
-  options: { pooling: "mean"; normalize: true },
-) => Promise<{ tolist(): number[][] }>;
+import { ai, EMBED_DIM, MODELS, withRetry } from "./gemini";
 
-type EmbedGlobal = typeof globalThis & {
-  __campusExtractor?: Promise<FeatureExtractor>;
-};
-
-async function localEmbed(texts: string[]): Promise<number[][]> {
-  const global = globalThis as EmbedGlobal;
-  if (!global.__campusExtractor) {
-    const { pipeline } = await import("@huggingface/transformers");
-    global.__campusExtractor = pipeline(
-      "feature-extraction",
-      "Xenova/all-MiniLM-L6-v2",
-    ) as Promise<FeatureExtractor>;
+function normalize(vector: number[]) {
+  if (vector.some((value) => !Number.isFinite(value))) {
+    throw new Error("Gemini returned a non-finite embedding value");
   }
-  const extractor = await global.__campusExtractor;
-  const output = await extractor(texts, { pooling: "mean", normalize: true });
-  const vectors = output.tolist();
-  validateVectors(vectors, texts.length);
-  return vectors;
+  const norm = Math.sqrt(vector.reduce((sum, value) => sum + value * value, 0));
+  if (norm === 0) throw new Error("Gemini returned a zero-length embedding");
+  return vector.map((value) => value / norm);
 }
 
-async function openaiEmbed(texts: string[]): Promise<number[][]> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error("OPENAI_API_KEY is required for the OpenAI embedding provider");
-  const response = await fetch("https://api.openai.com/v1/embeddings", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({ model: "text-embedding-3-small", input: texts, dimensions: 384 }),
-  });
-  if (!response.ok) {
-    throw new Error(`OpenAI embedding request failed (${response.status}): ${await response.text()}`);
-  }
-  const result: unknown = await response.json();
-  if (!result || typeof result !== "object" || !("data" in result) || !Array.isArray(result.data)) {
-    throw new Error("OpenAI embedding response has an invalid shape");
-  }
-  const vectors = result.data.map((item: { embedding: number[] }) => item.embedding);
-  validateVectors(vectors, texts.length);
-  return vectors;
-}
-
-function validateVectors(vectors: number[][], expectedCount: number) {
-  if (
-    vectors.length !== expectedCount ||
-    vectors.some((vector) => vector.length !== 384 || vector.some((value) => !Number.isFinite(value)))
-  ) {
-    throw new Error("Embedding provider returned an invalid vector shape");
-  }
-}
-
-export async function embed(texts: string[]) {
+export async function embed(texts: string[]): Promise<number[][]> {
   if (texts.length === 0) return [];
-  return process.env.EMBEDDING_PROVIDER === "openai"
-    ? openaiEmbed(texts)
-    : localEmbed(texts);
+  const response = await withRetry(() => ai().models.embedContent({
+    model: MODELS.embed,
+    contents: texts,
+    config: {
+      taskType: "SEMANTIC_SIMILARITY",
+      outputDimensionality: EMBED_DIM,
+    },
+  }));
+  const embeddings = response.embeddings ?? [];
+  if (embeddings.length !== texts.length) {
+    throw new Error(`Gemini returned ${embeddings.length} embeddings for ${texts.length} texts`);
+  }
+  return embeddings.map((embedding, index) => {
+    const values = embedding.values;
+    if (!values || values.length !== EMBED_DIM) {
+      throw new Error(`Gemini returned an invalid embedding at index ${index}`);
+    }
+    return normalize(values);
+  });
 }

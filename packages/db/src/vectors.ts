@@ -2,8 +2,8 @@ import type { Facet } from "@prisma/client";
 import { prisma } from "./index";
 
 function toVectorLiteral(vector: number[]) {
-  if (vector.length !== 384 || vector.some((value) => !Number.isFinite(value))) {
-    throw new Error("Embedding must contain 384 finite numbers");
+  if (vector.length !== 768 || vector.some((value) => !Number.isFinite(value))) {
+    throw new Error("Embedding must contain 768 finite numbers");
   }
   return `[${vector.join(",")}]`;
 }
@@ -21,14 +21,23 @@ export type SemanticRow = {
   facets: Record<string, number>;
 };
 
-export async function semanticCandidates(userId: string, limit = 50): Promise<SemanticRow[]> {
+export type FacetWeights = Record<Facet, number>;
+
+const DEFAULT_WEIGHTS: FacetWeights = { PERSONALITY: 0.3, INTERESTS: 0.4, LIFESTYLE: 0.15, INTENT: 0.15 };
+
+export async function semanticCandidates(
+  userId: string,
+  limit = 50,
+  weights: FacetWeights = DEFAULT_WEIGHTS,
+): Promise<SemanticRow[]> {
   return prisma.$queryRaw<SemanticRow[]>`
     WITH me AS (
       SELECT facet, embedding FROM "ProfileChunk"
       WHERE "userId" = ${userId} AND embedding IS NOT NULL
     ),
     weights(facet, w) AS (
-      VALUES ('PERSONALITY', 0.30), ('INTERESTS', 0.40), ('LIFESTYLE', 0.15), ('INTENT', 0.15)
+      VALUES ('PERSONALITY', ${weights.PERSONALITY}::float8), ('INTERESTS', ${weights.INTERESTS}::float8),
+             ('LIFESTYLE', ${weights.LIFESTYLE}::float8), ('INTENT', ${weights.INTENT}::float8)
     ),
     excluded AS (
       SELECT "toUserId" AS id FROM "Like" WHERE "fromUserId" = ${userId}
